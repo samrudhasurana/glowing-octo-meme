@@ -16,8 +16,7 @@ A modern, professional academic website built with HTML, CSS, and hosted on GitH
 
 1. Go to [GitHub](https://github.com) and sign in
 2. Click the "+" icon in the top right and select "New repository"
-3. Name it: `your-username.github.io` (replace `your-username` with your GitHub username)
-   - Example: If your username is `samrudha-surana`, name it `samrudha-surana.github.io`
+3. Name it: `glowing-octo-meme`
 4. Set it to **Public**
 5. Do NOT initialize with README
 6. Click "Create repository"
@@ -42,7 +41,7 @@ git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/your-username/your-username.github.io.git
+git remote add origin https://github.com/your-username/glowing-octo-meme.git
 git push -u origin main
 ```
 
@@ -56,58 +55,11 @@ git push -u origin main
 6. Click "Save"
 7. Wait 2-5 minutes for deployment
 
-Your site will be live at: `https://your-username.github.io`
+Your site will be live at: `https://your-username.github.io/glowing-octo-meme/`
 
-## Connecting to Your Custom Domain (samrudhasurana.com)
+For this repository, the expected URL is: `https://samrudhasurana.github.io/glowing-octo-meme/`
 
-### Step 1: Configure GitHub Pages
-
-1. In your repository, go to Settings → Pages
-2. Under "Custom domain", enter: `www.samrudhasurana.com`
-3. Click "Save"
-4. GitHub will create a `CNAME` file in your repository
-
-### Step 2: Update DNS Settings
-
-Go to your domain registrar (where you bought samrudhasurana.com) and add these DNS records:
-
-**For www subdomain:**
-```
-Type: CNAME
-Name: www
-Value: your-username.github.io
-TTL: 3600 (or Auto)
-```
-
-**For root domain (@):**
-Add these A records:
-```
-Type: A
-Name: @ (or leave blank)
-Value: 185.199.108.153
-
-Type: A
-Name: @ (or leave blank)
-Value: 185.199.109.153
-
-Type: A
-Name: @ (or leave blank)
-Value: 185.199.110.153
-
-Type: A
-Name: @ (or leave blank)
-Value: 185.199.111.153
-```
-
-### Step 3: Enable HTTPS
-
-1. Wait 24-48 hours for DNS to propagate
-2. Go back to Settings → Pages on GitHub
-3. Check "Enforce HTTPS"
-
-Your site will now be accessible at both:
-- `https://samrudhasurana.com`
-- `https://www.samrudhasurana.com`
+GitHub Pages will automatically serve `index.html`, so `https://samrudhasurana.github.io/glowing-octo-meme/index.html` should also work, but the shorter folder URL is the standard one to share.
 
 ## Updating Your Website
 
