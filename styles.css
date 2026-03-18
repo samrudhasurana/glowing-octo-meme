@@ -1,75 +1,32 @@
 :root {
-    --samosa-cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzOCIgaGVpZ2h0PSIzOCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ic2Ftb3NhRmlsbCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmNWQyOGMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZDQ5NDNmIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cGF0aCBkPSJNNiA2IEw0MSAyNCBMMTMgNDIgUTkgMzUgOCAyOCBRNiAxOCA2IDYgWiIgZmlsbD0idXJsKCNzYW1vc2FGaWxsKSIgc3Ryb2tlPSIjOGY1YTFmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8cGF0aCBkPSJNMTIgMTYgUTIwIDE3IDI1IDIyIiBmaWxsPSJub25lIiBzdHJva2U9IiNiNjc4MmQiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTEgMjQgUTIwIDI3IDIzIDMzIiBmaWxsPSJub25lIiBzdHJva2U9IiNiNjc4MmQiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNyIgY3k9IjIwIiByPSIxLjIiIGZpbGw9IiM5ZjY0MjQiLz4KICA8Y2lyY2xlIGN4PSIxOSIgY3k9IjI5IiByPSIxLjIiIGZpbGw9IiM5ZjY0MjQiLz4KPC9zdmc+Cg==') 5 5;
+    --daisy-cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDQ4IDQ4Ij4KICA8ZWxsaXBzZSBjeD0iMjQiIGN5PSIxMCIgcng9IjQiIHJ5PSI4IiBmaWxsPSIjRkZGREYwIiBzdHJva2U9IiNEOEQwQjAiIHN0cm9rZS13aWR0aD0iMC44Ii8+CiAgPGVsbGlwc2UgY3g9IjI0IiBjeT0iMTAiIHJ4PSI0IiByeT0iOCIgZmlsbD0iI0ZGRkRGMCIgc3Ryb2tlPSIjRDhEMEIwIiBzdHJva2Utd2lkdGg9IjAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgMjQgMjQpIi8+CiAgPGVsbGlwc2UgY3g9IjI0IiBjeT0iMTAiIHJ4PSI0IiByeT0iOCIgZmlsbD0iI0ZGRkRGMCIgc3Ryb2tlPSIjRDhEMEIwIiBzdHJva2Utd2lkdGg9IjAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMjQgMjQpIi8+CiAgPGVsbGlwc2UgY3g9IjI0IiBjeT0iMTAiIHJ4PSI0IiByeT0iOCIgZmlsbD0iI0ZGRkRGMCIgc3Ryb2tlPSIjRDhEMEIwIiBzdHJva2Utd2lkdGg9IjAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoMTM1IDI0IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIyNCIgY3k9IjEwIiByeD0iNCIgcnk9IjgiIGZpbGw9IiNGRkZERjAiIHN0cm9rZT0iI0Q4RDBCMCIgc3Ryb2tlLXdpZHRoPSIwLjgiIHRyYW5zZm9ybT0icm90YXRlKDE4MCAyNCAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMjQiIGN5PSIxMCIgcng9IjQiIHJ5PSI4IiBmaWxsPSIjRkZGREYwIiBzdHJva2U9IiNEOEQwQjAiIHN0cm9rZS13aWR0aD0iMC44IiB0cmFuc2Zvcm09InJvdGF0ZSgyMjUgMjQgMjQpIi8+CiAgPGVsbGlwc2UgY3g9IjI0IiBjeT0iMTAiIHJ4PSI0IiByeT0iOCIgZmlsbD0iI0ZGRkRGMCIgc3Ryb2tlPSIjRDhEMEIwIiBzdHJva2Utd2lkdGg9IjAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoMjcwIDI0IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIyNCIgY3k9IjEwIiByeD0iNCIgcnk9IjgiIGZpbGw9IiNGRkZERjAiIHN0cm9rZT0iI0Q4RDBCMCIgc3Ryb2tlLXdpZHRoPSIwLjgiIHRyYW5zZm9ybT0icm90YXRlKDMxNSAyNCAyNCkiLz4KICA8Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSI4IiBmaWxsPSIjRjVDNDMwIi8+CiAgPGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iNSIgZmlsbD0iI0U4QTgyMCIvPgo8L3N2Zz4K') 16 16;
 
-    --primary-color: #8B4513;
-    --primary-dark: #5D2F0D;
-    --accent-color: #D4A574;
-    --text-dark: #2C1810;
-    --text-medium: #5C4A42;
-    --text-light: #8A7968;
-    --bg-cream: #FDF8F3;
+    --primary-color: #5B8DB8;
+    --primary-dark: #3A6B94;
+    --accent-color: #F0C850;
+    --text-dark: #1C2D3E;
+    --text-medium: #4A6278;
+    --text-light: #7A95A8;
+    --bg-cream: #F8FAFD;
     --bg-white: #FFFFFF;
-    --border-color: #E5D5C3;
-    --shadow-subtle: rgba(139, 69, 19, 0.08);
-    --shadow-medium: rgba(139, 69, 19, 0.15);
+    --border-color: #C8D8E8;
+    --shadow-subtle: rgba(91, 141, 184, 0.08);
+    --shadow-medium: rgba(91, 141, 184, 0.15);
 }
 
-/* Sage green color theme */
-[data-color="sage"] {
-    --primary-color: #5F7A61;
-    --primary-dark: #3D5340;
-    --accent-color: #A4C3A2;
-    --text-dark: #1C2B1C;
-    --text-medium: #4A5D4A;
-    --text-light: #6B7F6B;
-    --bg-cream: #F5F8F5;
-    --bg-white: #FFFFFF;
-    --border-color: #D1E0D1;
-    --shadow-subtle: rgba(95, 122, 97, 0.08);
-    --shadow-medium: rgba(95, 122, 97, 0.15);
-}
-
-/* Dark mode colors - brown theme */
+/* Dark mode */
 [data-theme="dark"] {
-    --primary-color: #D4A574;
-    --primary-dark: #E5C4A8;
-    --accent-color: #8B4513;
-    --text-dark: #F5EDE6;
-    --text-medium: #D4C8BC;
-    --text-light: #A89888;
-    --bg-cream: #1A1512;
-    --bg-white: #2C241E;
-    --border-color: #4A3F35;
+    --primary-color: #89BCE0;
+    --primary-dark: #B8D8F0;
+    --accent-color: #F0C850;
+    --text-dark: #E8F2FA;
+    --text-medium: #BED0E0;
+    --text-light: #8AAABF;
+    --bg-cream: #111A24;
+    --bg-white: #1A2838;
+    --border-color: #2D4A60;
     --shadow-subtle: rgba(0, 0, 0, 0.2);
     --shadow-medium: rgba(0, 0, 0, 0.3);
-}
-
-/* Dark mode colors - sage theme */
-[data-color="sage"][data-theme="dark"] {
-    --primary-color: #A4C3A2;
-    --primary-dark: #C5DBC4;
-    --accent-color: #5F7A61;
-    --text-dark: #E8F0E8;
-    --text-medium: #B8CCB8;
-    --text-light: #8AA88A;
-    --bg-cream: #121A12;
-    --bg-white: #1E291E;
-    --border-color: #354435;
-    --shadow-subtle: rgba(0, 0, 0, 0.2);
-    --shadow-medium: rgba(0, 0, 0, 0.3);
-}
-
-/* Font families */
-.font-palatino {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-}
-
-.font-computer-modern {
-    font-family: 'STIX Two Text', 'Computer Modern Serif', 'Latin Modern Roman', 'Times New Roman', serif;
-}
-
-.font-noto-sans {
-    font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Controls bar */
@@ -90,28 +47,6 @@
     gap: 0.5rem;
 }
 
-.control-group label {
-    font-size: 0.85rem;
-    color: var(--text-medium);
-}
-
-.font-select,
-.color-select {
-    padding: 0.35rem 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: var(--bg-cream);
-    color: var(--text-dark);
-    font-size: 0.85rem;
-    cursor: pointer;
-}
-
-.font-select:focus,
-.color-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
 .theme-toggle {
     display: flex;
     align-items: center;
@@ -122,7 +57,7 @@
     background: var(--bg-cream);
     color: var(--text-dark);
     font-size: 0.85rem;
-    cursor: pointer;
+    cursor: var(--daisy-cursor), pointer;
     transition: all 0.3s ease;
 }
 
@@ -139,7 +74,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    cursor: var(--samosa-cursor), auto !important;
+    cursor: var(--daisy-cursor), auto !important;
 }
 
 button,
@@ -147,12 +82,12 @@ a,
 select,
 label,
 [role="button"] {
-    cursor: var(--samosa-cursor), pointer;
+    cursor: var(--daisy-cursor), pointer;
 }
 
 body {
-    cursor: var(--samosa-cursor), auto;
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+    cursor: var(--daisy-cursor), auto;
+    font-family: 'Century Schoolbook', 'Book Antiqua', Georgia, serif;
     font-size: 1.125rem;
     color: var(--text-dark);
     background: var(--bg-cream);
@@ -177,7 +112,7 @@ body {
 }
 
 [data-theme="dark"] .nav-container {
-    background: rgba(44, 36, 30, 0.98);
+    background: rgba(26, 40, 56, 0.98);
 }
 
 .nav-content {
@@ -278,18 +213,6 @@ body {
     color: var(--text-medium);
     margin-bottom: 1.5rem;
     line-height: 1.7;
-}
-
-.philosophy-text {
-    font-style: italic;
-    color: var(--text-light);
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.philosophy-line {
-    display: block;
 }
 
 .hero-links {
@@ -457,15 +380,5 @@ body {
 
     .hero-image {
         max-width: 280px;
-    }
-
-    .controls-bar {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .control-group {
-        width: 100%;
-        justify-content: center;
     }
 }

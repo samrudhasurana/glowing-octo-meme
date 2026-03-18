@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="images/samosa-cursor.svg">
+    <link rel="icon" type="image/svg+xml" href="images/daisy-cursor.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage Research</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         .admin-container {
             max-width: 900px;
@@ -535,7 +532,7 @@
         }
     </style>
 </head>
-<body data-theme="light" class="font-palatino">
+<body data-theme="light">
     <!-- Password Protection -->
     <div id="password-overlay" class="password-overlay">
         <div class="password-box">
@@ -603,6 +600,7 @@
                     <label for="entry-type">Entry Type *</label>
                     <select id="entry-type" required onchange="updateFormFields()">
                         <option value="">Select type...</option>
+                        <option value="peerReviewedArticles">Peer-Reviewed Article</option>
                         <option value="policyPapers">Policy Paper</option>
                         <option value="bookReviews">Book Review</option>
                         <option value="workingPapers">Working Paper</option>
@@ -626,12 +624,12 @@
 
                 <div class="form-group" id="venue-group">
                     <label for="venue">Venue/Publication</label>
-                    <input type="text" id="venue" placeholder="e.g., Mercatus Research">
+                    <input type="text" id="venue" placeholder="e.g., Constitutional Political Economy">
                 </div>
 
                 <div class="form-group" id="date-group">
                     <label for="date">Date</label>
-                    <input type="text" id="date" placeholder="e.g., December 2024">
+                    <input type="text" id="date" placeholder="e.g., 2025">
                 </div>
 
                 <div class="form-group hidden" id="end-date-group">
@@ -668,7 +666,7 @@
 
                 <div class="form-group hidden" id="note-link-group">
                     <label for="note-link-text">Note Link Text (optional)</label>
-                    <input type="text" id="note-link-text" placeholder="e.g., profile on B.R. Shenoy">
+                    <input type="text" id="note-link-text" placeholder="e.g., link text">
                     <label for="note-link-url" style="margin-top: 0.5rem;">Note Link URL</label>
                     <input type="url" id="note-link-url" placeholder="https://...">
                     <small>If your note contains a link, specify the text and URL</small>
@@ -710,6 +708,7 @@
                 <label for="category-filter">Filter by category:</label>
                 <select id="category-filter" onchange="renderEntries()">
                     <option value="all">All Categories</option>
+                    <option value="peerReviewedArticles">Peer-Reviewed Articles</option>
                     <option value="policyPapers">Policy Papers</option>
                     <option value="bookReviews">Book Reviews</option>
                     <option value="workingPapers">Working Papers</option>
@@ -726,13 +725,14 @@
     </main>
 
     <script>
-    // Configuration
-    const GITHUB_REPO = 'samrudhasurana/samrudhasurana.github.io';
+    // Configuration — update GITHUB_REPO to your repository
+    const GITHUB_REPO = 'mollyrovinski/mollyrovinski.github.io';
     const GITHUB_BRANCH = 'main';
     const FILE_PATH = 'research-data.json';
-    const ADMIN_PASSWORD = 'samrudha2025';
+    const ADMIN_PASSWORD = 'molly2025';
 
     const CATEGORY_LABELS = {
+        peerReviewedArticles: 'Peer-Reviewed Articles',
         policyPapers: 'Policy Papers',
         bookReviews: 'Book Reviews',
         workingPapers: 'Working Papers',
@@ -914,10 +914,8 @@
         const entry = researchData[type][index];
         if (!entry) return;
 
-        // Switch to add tab
         switchTab('add');
 
-        // Set edit mode - store original title/name for matching in GitHub content
         editMode = true;
         editOriginalTitle = entry.title || entry.name;
         document.getElementById('edit-type').value = type;
@@ -926,7 +924,6 @@
         document.getElementById('edit-title').textContent = (entry.title || entry.name || '').replace(/<[^>]*>/g, '').substring(0, 50) + '...';
         document.getElementById('publish-btn').textContent = 'Update Entry';
 
-        // Populate form
         document.getElementById('entry-type').value = type;
         updateFormFields();
 
@@ -952,7 +949,6 @@
             document.getElementById('pdfUrl').value = entry.pdfUrl || '';
             document.getElementById('abstract').value = entry.abstract || '';
 
-            // Handle note field
             if (entry.note) {
                 if (typeof entry.note === 'object') {
                     document.getElementById('note').value = entry.note.text || '';
@@ -964,7 +960,6 @@
             }
         }
 
-        // Scroll to form
         document.getElementById('research-form').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -983,7 +978,6 @@
         const entry = researchData[type][index];
         if (!entry) return;
 
-        // Store the title/name for matching in fresh GitHub content
         const deleteKey = type === 'conferences' ? entry.name : entry.title;
         deleteTarget = { type, title: deleteKey };
         document.getElementById('confirm-message').textContent =
@@ -1009,7 +1003,6 @@
         const { type, title } = deleteTarget;
 
         try {
-            // Fetch current file from GitHub
             const fileResponse = await fetch(
                 `https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}?ref=${GITHUB_BRANCH}`,
                 {
@@ -1027,7 +1020,6 @@
             const fileData = await fileResponse.json();
             fileSha = fileData.sha;
 
-            // Parse and update content - find entry by title/name
             const currentContent = JSON.parse(atob(fileData.content));
             const entryIndex = type === 'conferences'
                 ? currentContent[type]?.findIndex(e => e.name === title)
@@ -1039,7 +1031,6 @@
 
             currentContent[type].splice(entryIndex, 1);
 
-            // Commit updated file
             const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
 
             const commitResponse = await fetch(
@@ -1065,7 +1056,6 @@
                 throw new Error(errorData.message || 'Failed to commit to GitHub');
             }
 
-            // Update local data and refresh
             researchData = currentContent;
             renderEntries();
             alert('Entry deleted successfully!');
@@ -1088,9 +1078,9 @@
         document.querySelector('label[for="authors"]').textContent = 'Authors';
         document.getElementById('authors').placeholder = 'e.g., with John Smith';
         document.querySelector('label[for="venue"]').textContent = 'Venue/Publication';
-        document.getElementById('venue').placeholder = 'e.g., Mercatus Research';
+        document.getElementById('venue').placeholder = 'e.g., Constitutional Political Economy';
         document.querySelector('label[for="date"]').textContent = 'Date';
-        document.getElementById('date').placeholder = 'e.g., December 2024';
+        document.getElementById('date').placeholder = 'e.g., 2025';
 
         document.getElementById('pdf-group').classList.add('hidden');
         document.getElementById('abstract-group').classList.add('hidden');
@@ -1105,6 +1095,9 @@
         document.getElementById('url-group').classList.remove('hidden');
 
         switch(type) {
+            case 'peerReviewedArticles':
+                document.getElementById('abstract-group').classList.remove('hidden');
+                break;
             case 'policyPapers':
                 document.getElementById('pdf-group').classList.remove('hidden');
                 document.getElementById('abstract-group').classList.remove('hidden');
@@ -1169,7 +1162,7 @@
             </div>
             <div class="form-group">
                 <label>Session Name</label>
-                <input type="text" class="pres-session" placeholder="e.g., Session on Economic Growth" value="${escapeHtml(data.session)}">
+                <input type="text" class="pres-session" placeholder="e.g., Session on Immigration Policy" value="${escapeHtml(data.session)}">
             </div>
             <div class="session-row">
                 <div class="form-group">
@@ -1257,7 +1250,7 @@
         }
 
         const abstract = document.getElementById('abstract').value;
-        if (abstract && ['policyPapers', 'workingPapers'].includes(type)) {
+        if (abstract && ['peerReviewedArticles', 'policyPapers', 'workingPapers'].includes(type)) {
             entry.abstract = abstract;
         }
 
@@ -1308,7 +1301,6 @@
         publishBtn.disabled = true;
 
         try {
-            // Fetch current file from GitHub
             const fileResponse = await fetch(
                 `https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}?ref=${GITHUB_BRANCH}`,
                 {
@@ -1330,10 +1322,7 @@
             const { type, entry } = buildEntry();
 
             if (editMode) {
-                // Update existing entry - find by original title to handle GitHub changes
                 const editType = document.getElementById('edit-type').value;
-
-                // Find the entry by its original title/name in the fresh GitHub content
                 const entryIndex = editType === 'conferences'
                     ? currentContent[editType]?.findIndex(e => e.name === editOriginalTitle)
                     : currentContent[editType]?.findIndex(e => e.title === editOriginalTitle);
@@ -1342,7 +1331,6 @@
                     throw new Error('Could not find the original entry. It may have been modified or deleted. Please refresh the page and try again.');
                 }
 
-                // If type changed, remove from old category and add to new
                 if (editType !== type) {
                     currentContent[editType].splice(entryIndex, 1);
                     if (!currentContent[type]) currentContent[type] = [];
@@ -1351,14 +1339,12 @@
                     currentContent[type][entryIndex] = entry;
                 }
             } else {
-                // Add new entry
                 if (!currentContent[type]) {
                     currentContent[type] = [];
                 }
                 currentContent[type].unshift(entry);
             }
 
-            // Commit updated file
             const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
 
             const commitResponse = await fetch(
@@ -1384,21 +1370,17 @@
                 throw new Error(errorData.message || 'Failed to commit to GitHub');
             }
 
-            // Success!
             showFormMessage(
                 `Successfully ${editMode ? 'updated' : 'published'} "${entry.title || entry.name}"! The changes will be live shortly.`,
                 'success'
             );
 
-            // Update local data
             researchData = currentContent;
 
-            // Show the generated JSON
             generatedEntry = { type, entry };
             document.getElementById('json-output').textContent = JSON.stringify(entry, null, 2);
             document.getElementById('output-section').classList.remove('hidden');
 
-            // Reset form after short delay
             setTimeout(() => {
                 if (editMode) {
                     cancelEdit();
