@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="images/samosa-cursor.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samrudha Surana - Economist & Researcher</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="research.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=STIX+Two+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body data-theme="light" data-color="brown" class="font-palatino">
+    <div class="controls-bar">
+        <div class="control-group">
+            <label for="font-select">Font:</label>
+            <select id="font-select" class="font-select" onchange="changeFont(this.value)">
+                <option value="palatino">Palatino</option>
+                <option value="computer-modern">Computer Modern</option>
+                <option value="noto-sans">Noto Sans</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="color-select">Color:</label>
+            <select id="color-select" class="color-select" onchange="changeColor(this.value)">
+                <option value="brown">Warm Brown</option>
+                <option value="sage">Sage Green</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <span id="theme-label">Dark</span>
+            </button>
+        </div>
+    </div>
+    <nav class="nav-container">
+        <div class="nav-content">
+            <a href="index.html" class="logo">Samrudha Surana</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="research.html">Research</a></li>
+                <li><a href="cv.html">CV</a></li>
+                <li><a href="https://econexchange.substack.com/" target="_blank">Substack</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">Samrudha Surana</h1>
+                    <p class="hero-subtitle">PhD Student in Economics at George Mason University</p>
+                    <p class="hero-description">
+                        I'm a second-year PhD student in Economics at George Mason University, 
+                        and a Graduate Fellow with the F. A. Hayek Program in Philosophy, Politics, 
+                        and Economics at the Mercatus Center.
+                    </p>
+                    <p class="hero-description">
+                        My research interests revolve around the political economy of religion, and how people can find non-state solutions to deal with conflict.
+                    </p>
+                    <p class="hero-description philosophy-text">
+                        <span class="philosophy-line">How can we live in a peaceful and prosperous society?</span>
+                        <span class="philosophy-line">I want to get to this question, one samosa at a time.</span>
+                    </p>
+                    <div class="hero-links">
+                        <a href="https://econexchange.substack.com/" target="_blank">Substack</a>
+                        <a href="https://merch.samosanomics.com/" target="_blank">T-Shirt Shop</a>
+                        <a href="research.html">Research</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="image-frame">
+                        <img src="images/samrudha_headshot.png" alt="Samrudha Surana">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-contact">
+                <h3>Contact</h3>
+                <p class="footer-email">ssurana [at] gmu [dot] edu</p>
+                <div class="footer-social">
+                    <a href="https://www.linkedin.com/in/samrudha-surana/" target="_blank" aria-label="LinkedIn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                            <rect x="2" y="9" width="4" height="12"></rect>
+                            <circle cx="4" cy="4" r="2"></circle>
+                        </svg>
+                    </a>
+                    <a href="https://x.com/samrudha_surana" target="_blank" aria-label="Twitter/X">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <p class="footer-copyright">&copy; 2025 Samrudha Surana. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+    function changeFont(font) {
+        document.body.classList.remove('font-palatino', 'font-computer-modern', 'font-noto-sans');
+        document.body.classList.add('font-' + font);
+        localStorage.setItem('preferredFont', font);
+    }
+
+    function changeColor(color) {
+        document.body.setAttribute('data-color', color);
+        localStorage.setItem('preferredColor', color);
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('preferredTheme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const sunIcon = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+        const label = document.getElementById('theme-label');
+        if (theme === 'dark') {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+            label.textContent = 'Light';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+            label.textContent = 'Dark';
+        }
+    }
+
+    // Load saved preferences
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedFont = localStorage.getItem('preferredFont') || 'palatino';
+        const savedTheme = localStorage.getItem('preferredTheme') || 'light';
+        const savedColor = localStorage.getItem('preferredColor') || 'brown';
+
+        changeFont(savedFont);
+        document.getElementById('font-select').value = savedFont;
+
+        changeColor(savedColor);
+        document.getElementById('color-select').value = savedColor;
+
+        document.body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    });
+    </script>
+
+    <!-- Conferences Floating Tab -->
+    <button id="conferences-float-btn" class="conferences-float-btn" onclick="openConferencesPanel()" aria-label="Conferences I'll be at — open panel" hidden>
+        Conferences I'll be at
+    </button>
+
+    <!-- Conferences Side Panel -->
+    <div id="conferences-overlay" class="side-panel-overlay" onclick="closeConferencesPanel()"></div>
+    <aside id="conferences-side-panel" class="side-panel" role="dialog" aria-modal="true" aria-label="Conferences">
+        <div class="side-panel-header">
+            <span class="side-panel-title">Conferences</span>
+            <button class="side-panel-close" onclick="closeConferencesPanel()" aria-label="Close">&times;</button>
+        </div>
+        <div class="side-panel-body">
+            <div class="conferences-list" id="conferences-panel-list"></div>
+        </div>
+    </aside>
+
+    <script>
+    function openConferencesPanel() {
+        document.getElementById('conferences-side-panel').classList.add('is-open');
+        document.getElementById('conferences-overlay').classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeConferencesPanel() {
+        document.getElementById('conferences-side-panel').classList.remove('is-open');
+        document.getElementById('conferences-overlay').classList.remove('is-open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeConferencesPanel();
+    });
+
+    fetch('research-data.json')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.conferences || data.conferences.length === 0) return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = data.conferences
+                .filter(c => c.endDate && new Date(c.endDate) >= today)
+                .sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+            const past = data.conferences
+                .filter(c => !c.endDate || new Date(c.endDate) < today)
+                .sort((a, b) => new Date(b.endDate || 0) - new Date(a.endDate || 0));
+
+            function buildConfCard(conf) {
+                const confDate = conf.date || conf.dates || '';
+                let html = `
+                    <div class="conference-item">
+                        <div class="conference-main">
+                            <span class="conference-name">${conf.name}</span>
+                            ${conf.role ? `<span class="conference-role">${conf.role}</span>` : ''}
+                        </div>
+                        <div class="conference-meta">
+                            ${conf.location ? `<span class="conference-location">${conf.location}</span>` : ''}
+                            ${conf.location && confDate ? `<span class="conference-sep">&middot;</span>` : ''}
+                            ${confDate ? `<span class="conference-date">${confDate}</span>` : ''}
+                        </div>
+                `;
+                if (conf.presentations && conf.presentations.length > 0) {
+                    html += `<div class="conf-presentations">`;
+                    conf.presentations.forEach(p => {
+                        html += `
+                            <div class="conf-pres-item">
+                                <div class="conf-pres-title">${p.title || ''}${p.coauthors ? `<span class="conf-pres-coauthors"> ${p.coauthors}</span>` : ''}</div>
+                                ${p.session ? `<div class="conf-pres-session">${p.session}</div>` : ''}
+                                ${(p.sessionDate || p.sessionTime) ? `<div class="conf-pres-time">${[p.sessionDate, p.sessionTime].filter(Boolean).join(', ')}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
+                return html;
+            }
+
+            const panelList = document.getElementById('conferences-panel-list');
+            let panelHtml = '';
+            if (upcoming.length > 0) {
+                panelHtml += `<h3 class="panel-section-heading">Upcoming</h3><div class="conferences-list">`;
+                upcoming.forEach(c => { panelHtml += buildConfCard(c); });
+                panelHtml += `</div>`;
+            }
+            if (past.length > 0) {
+                panelHtml += `<h3 class="panel-section-heading">Previously at</h3><div class="conferences-list">`;
+                past.forEach(c => { panelHtml += buildConfCard(c); });
+                panelHtml += `</div>`;
+            }
+            panelList.innerHTML = panelHtml;
+            document.getElementById('conferences-float-btn').hidden = false;
+        });
+    </script>
+</body>
+</html>

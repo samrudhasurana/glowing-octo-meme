@@ -1,0 +1,483 @@
+/* Research Page Specific Styles */
+
+.page-header {
+    padding: 3rem 0 2.5rem;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.page-subtitle {
+    font-size: 1rem;
+    color: var(--text-medium);
+    max-width: 600px;
+}
+
+.research-section {
+    margin-bottom: 3.5rem;
+    animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.research-section:nth-child(2) { animation-delay: 0.1s; }
+.research-section:nth-child(3) { animation-delay: 0.2s; }
+.research-section:nth-child(4) { animation-delay: 0.3s; }
+.research-section:nth-child(5) { animation-delay: 0.4s; }
+.research-section:nth-child(6) { animation-delay: 0.5s; }
+
+.section-title {
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+/* Publication Cards */
+.publication-card {
+    background: var(--bg-white);
+    padding: 1.75rem;
+    border-radius: 4px;
+    border-left: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.publication-card:hover {
+    border-left-color: var(--primary-color);
+    box-shadow: 0 2px 8px var(--shadow-subtle);
+}
+
+.pub-title {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.pub-title a {
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.pub-title a:hover {
+    color: var(--primary-color);
+}
+
+.pub-title em {
+    font-style: italic;
+}
+
+.pub-authors {
+    color: var(--text-medium);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.pub-venue {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.pub-venue a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.pub-venue a:hover {
+    text-decoration: underline;
+}
+
+.pub-date {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.pub-note {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.pub-note a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.pub-note a:hover {
+    text-decoration: underline;
+}
+
+.pub-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.pdf-link {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--primary-color);
+    color: var(--bg-white);
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.pdf-link:hover {
+    background: var(--primary-dark);
+}
+
+.abstract-toggle {
+    padding: 0.5rem 1.25rem;
+    background: transparent;
+    color: var(--text-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+.abstract-toggle:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.abstract-content {
+    margin-top: 1.25rem;
+    padding: 1.25rem;
+    background: var(--bg-cream);
+    border-radius: 3px;
+    border-left: 2px solid var(--accent-color);
+}
+
+.abstract-content p {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* Works in Progress */
+.wip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.wip-item {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: 4px;
+    border-left: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.wip-item:hover {
+    border-left-color: var(--primary-color);
+    box-shadow: 0 2px 8px var(--shadow-subtle);
+}
+
+.wip-item h3 {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Popular Articles Grid */
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+}
+
+.article-card {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.article-card:hover {
+    box-shadow: 0 2px 8px var(--shadow-subtle);
+    border-color: var(--primary-color);
+}
+
+.article-card h3 {
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.article-meta {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Conferences Floating Tab */
+.conferences-float-btn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    background: var(--primary-color);
+    color: var(--bg-white);
+    border: none;
+    padding: 1.25rem 0.65rem;
+    writing-mode: vertical-rl;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border-radius: 6px 0 0 6px;
+    box-shadow: -3px 0 10px var(--shadow-medium);
+    transition: background 0.2s ease, padding-right 0.2s ease;
+}
+
+.conferences-float-btn:hover {
+    background: var(--primary-dark);
+    padding-right: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .conferences-float-btn {
+        font-size: 0.85rem;
+        padding: 1rem 0.55rem;
+    }
+}
+
+/* Conferences Side Panel */
+.side-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.side-panel-overlay.is-open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;
+    max-width: 100vw;
+    height: 100%;
+    background: var(--bg-cream);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 24px var(--shadow-medium);
+}
+
+.side-panel.is-open {
+    transform: translateX(0);
+}
+
+.side-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    background: var(--bg-cream);
+    z-index: 1;
+}
+
+.side-panel-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.side-panel-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text-light);
+    padding: 0.25rem 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.side-panel-close:hover {
+    color: var(--text-dark);
+}
+
+.side-panel-body {
+    padding: 1.25rem 1.5rem;
+    flex: 1;
+}
+
+@media (max-width: 480px) {
+    .side-panel {
+        width: 100vw;
+    }
+}
+
+/* Panel section headings (Upcoming / Previously at) */
+.panel-section-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin: 1.5rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-section-heading:first-child {
+    margin-top: 0;
+}
+
+.conferences-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Presentation details within a conference panel card */
+.conf-presentations {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.conf-pres-item {
+    font-size: 0.875rem;
+}
+
+.conf-pres-title {
+    color: var(--text-dark);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.conf-pres-coauthors {
+    color: var(--text-medium);
+    font-weight: 400;
+}
+
+.conf-pres-session {
+    color: var(--text-medium);
+    margin-top: 0.2rem;
+    font-style: italic;
+    font-size: 0.82rem;
+}
+
+.conf-pres-time {
+    color: var(--text-light);
+    font-size: 0.78rem;
+    margin-top: 0.1rem;
+}
+
+.conference-item {
+    background: var(--bg-white);
+    padding: 1.1rem 1.5rem;
+    border-radius: 4px;
+    border-left: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.conference-item:hover {
+    border-left-color: var(--primary-color);
+    box-shadow: 0 2px 8px var(--shadow-subtle);
+}
+
+.conference-main {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.conference-name {
+    font-size: 1rem;
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.conference-role {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-style: italic;
+}
+
+.conference-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.conference-sep {
+    color: var(--border-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+    
+    .articles-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .pub-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
