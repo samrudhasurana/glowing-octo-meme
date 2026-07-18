@@ -4,6 +4,10 @@ const deckId = params.get("id");
 const deckTitleEl = document.getElementById("deck-title");
 const errorEl = document.getElementById("error");
 const progressTextEl = document.getElementById("progress-text");
+const setupAreaEl = document.getElementById("setup-area");
+const setupInfoEl = document.getElementById("setup-info");
+const sessionSizeInput = document.getElementById("session-size");
+const startSessionBtn = document.getElementById("start-session-btn");
 const cardAreaEl = document.getElementById("card-area");
 const doneAreaEl = document.getElementById("done-area");
 const flipCardEl = document.getElementById("flip-card");
@@ -14,6 +18,7 @@ const explanationTextEl = document.getElementById("explanation-text");
 const ratingButtonsEl = document.getElementById("rating-buttons");
 const flipHintEl = document.getElementById("flip-hint");
 
+let allDue = [];
 let queue = [];
 let index = 0;
 let total = 0;
@@ -72,6 +77,26 @@ function finish() {
   progressTextEl.textContent = "";
 }
 
+document.querySelectorAll("#setup-area [data-quick]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    sessionSizeInput.value = btn.dataset.quick === "all" ? allDue.length : btn.dataset.quick;
+  });
+});
+
+startSessionBtn.addEventListener("click", () => {
+  let n = parseInt(sessionSizeInput.value, 10);
+  if (!Number.isFinite(n) || n < 1) n = allDue.length;
+  n = Math.min(n, allDue.length);
+
+  queue = allDue.slice(0, n);
+  total = queue.length;
+  index = 0;
+
+  setupAreaEl.classList.add("hidden");
+  cardAreaEl.classList.remove("hidden");
+  showCurrentCard();
+});
+
 async function load() {
   if (!deckId) {
     showError("No deck specified.");
@@ -80,16 +105,17 @@ async function load() {
   try {
     const deck = await api.getDeck(deckId);
     deckTitleEl.textContent = `Study: ${deck.name}`;
-    queue = await api.getStudyQueue(deckId);
-    total = queue.length;
-    if (total === 0) {
+    allDue = await api.getStudyQueue(deckId);
+    if (allDue.length === 0) {
       cardAreaEl.classList.add("hidden");
       doneAreaEl.classList.remove("hidden");
       doneAreaEl.innerHTML = `✅ No cards due right now. Nice work.<br/><a href="index.html">Back to dashboard</a>`;
       return;
     }
-    cardAreaEl.classList.remove("hidden");
-    showCurrentCard();
+    setupInfoEl.textContent = `${allDue.length} card${allDue.length === 1 ? " is" : "s are"} due for review.`;
+    sessionSizeInput.value = Math.min(20, allDue.length);
+    sessionSizeInput.max = allDue.length;
+    setupAreaEl.classList.remove("hidden");
   } catch (err) {
     showError(err.message);
   }

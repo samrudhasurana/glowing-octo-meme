@@ -132,9 +132,7 @@ app.get("/api/decks/:id/study", (req, res) => {
   const { decks, cards } = load();
   const deck = decks.find((d) => d.id === req.params.id);
   if (!deck) return res.status(404).json({ error: "Deck not found." });
-  const due = cards
-    .filter((c) => c.deckId === deck.id && isDue(c.srs))
-    .sort((a, b) => new Date(a.srs.dueDate) - new Date(b.srs.dueDate));
+  const due = shuffle(cards.filter((c) => c.deckId === deck.id && isDue(c.srs)));
   res.json(due);
 });
 

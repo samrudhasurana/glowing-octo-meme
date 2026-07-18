@@ -23,6 +23,23 @@
 
     <div class="study-stage">
       <div class="progress-text" id="progress-text"></div>
+
+      <div id="setup-area" class="panel hidden" style="max-width: 480px; margin: 20px auto; text-align: left;">
+        <h2>Ready for a quiz?</h2>
+        <p id="setup-info" class="subtitle"></p>
+        <label for="session-size">How many questions this session?</label>
+        <input type="number" id="session-size" min="1" />
+        <div class="row wrap" style="margin-top: 8px;">
+          <button type="button" class="btn secondary" data-quick="10">10</button>
+          <button type="button" class="btn secondary" data-quick="20">20</button>
+          <button type="button" class="btn secondary" data-quick="50">50</button>
+          <button type="button" class="btn secondary" data-quick="all">All</button>
+        </div>
+        <div class="row" style="margin-top: 16px;">
+          <button class="btn" id="start-session-btn">Start quiz</button>
+        </div>
+      </div>
+
       <div id="quiz-area" class="hidden">
         <h2 id="question-text" style="max-width: 640px; margin: 0 auto;"></h2>
         <div class="quiz-options" id="quiz-options"></div>
