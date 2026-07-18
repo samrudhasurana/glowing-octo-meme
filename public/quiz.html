@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz - Med Flashcards</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🩺 Med Flashcards</div>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="import.html">Import</a>
+    </nav>
+  </header>
+
+  <main>
+    <a href="index.html">&larr; Back to dashboard</a>
+    <h1 id="deck-title">Quiz</h1>
+
+    <div id="error" class="error-banner hidden"></div>
+
+    <div class="study-stage">
+      <div class="progress-text" id="progress-text"></div>
+      <div id="quiz-area" class="hidden">
+        <h2 id="question-text" style="max-width: 640px; margin: 0 auto;"></h2>
+        <div class="quiz-options" id="quiz-options"></div>
+        <p class="subtitle" id="explanation-text"></p>
+        <div class="row" style="justify-content: center; margin-top: 16px;">
+          <button class="btn hidden" id="next-btn">Next</button>
+        </div>
+      </div>
+      <div id="done-area" class="empty-state hidden"></div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/quiz.js"></script>
+</body>
+</html>

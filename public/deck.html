@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Deck - Med Flashcards</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🩺 Med Flashcards</div>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="import.html">Import</a>
+    </nav>
+  </header>
+
+  <main>
+    <a href="index.html">&larr; Back to dashboard</a>
+    <h1 id="deck-name">Loading…</h1>
+    <p class="subtitle" id="deck-description"></p>
+
+    <div id="error" class="error-banner hidden"></div>
+
+    <div class="panel">
+      <h2>Add a card</h2>
+      <form id="add-card-form">
+        <label for="front">Front (question)</label>
+        <textarea id="front" required></textarea>
+        <label for="back">Back (answer)</label>
+        <textarea id="back" required></textarea>
+        <label for="explanation">Explanation (optional)</label>
+        <textarea id="explanation"></textarea>
+        <label for="tags">Tags (comma-separated, optional)</label>
+        <input type="text" id="tags" placeholder="e.g. pharmacology, antibiotics" />
+        <label for="distractors">
+          Quiz distractors (optional, comma-separated — wrong answers for multiple choice.
+          If left blank, distractors are auto-picked from other cards in this deck.)
+        </label>
+        <input type="text" id="distractors" placeholder="e.g. Amoxicillin, Vancomycin, Metronidazole" />
+        <div class="row" style="margin-top: 16px;">
+          <button type="submit" class="btn">Add card</button>
+        </div>
+      </form>
+    </div>
+
+    <h2 style="margin-top: 28px;">Cards (<span id="card-count">0</span>)</h2>
+    <div id="card-list" class="card-list"></div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/deck.js"></script>
+</body>
+</html>
