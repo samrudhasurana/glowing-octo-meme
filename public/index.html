@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Med Flashcards</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🩺 Med Flashcards</div>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="import.html">Import</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="row between">
+      <div>
+        <h1>Your decks</h1>
+        <p class="subtitle">Spaced repetition + quiz practice for med school.</p>
+      </div>
+      <button class="btn" id="new-deck-btn">+ New deck</button>
+    </div>
+
+    <div id="error" class="error-banner hidden"></div>
+
+    <form id="new-deck-form" class="panel hidden">
+      <label for="deck-name">Deck name</label>
+      <input type="text" id="deck-name" placeholder="e.g. Pharmacology - Antibiotics" required />
+      <label for="deck-description">Description (optional)</label>
+      <textarea id="deck-description" placeholder="What this deck covers"></textarea>
+      <div class="row" style="margin-top: 16px;">
+        <button type="submit" class="btn">Create deck</button>
+        <button type="button" class="btn secondary" id="cancel-new-deck">Cancel</button>
+      </div>
+    </form>
+
+    <div id="deck-list" class="card-list"></div>
+    <div id="empty-state" class="empty-state hidden">
+      No decks yet. Create one, or head to <a href="import.html">Import</a> to bring in
+      AI-generated cards from a textbook.
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "med-flashcards",
+  "version": "1.0.0",
+  "description": "Local flashcards and quiz app for medical school study, with spaced repetition and AI-assisted card import.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
