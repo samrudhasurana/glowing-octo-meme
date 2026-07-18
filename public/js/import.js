@@ -36,11 +36,14 @@ async function loadDecks() {
     .join("");
   targetDeckSelect.innerHTML =
     `<option value="__new__">+ Create a new deck</option>` + options;
+  syncNewDeckFieldsVisibility();
 }
 
-targetDeckSelect.addEventListener("change", () => {
+function syncNewDeckFieldsVisibility() {
   newDeckFields.classList.toggle("hidden", targetDeckSelect.value !== "__new__");
-});
+}
+
+targetDeckSelect.addEventListener("change", syncNewDeckFieldsVisibility);
 
 previewBtn.addEventListener("click", () => {
   clearBanners();
