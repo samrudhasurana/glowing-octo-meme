@@ -1,0 +1,146 @@
+{
+  "deckName": "Sample Deck: Med School Basics",
+  "deckDescription": "20 example cards spanning pharmacology, physiology, biochemistry, microbiology, and more — loaded automatically so there's something to try right away.",
+  "cards": [
+    {
+      "front": "What is the mechanism of action of penicillin?",
+      "back": "Inhibits bacterial cell wall synthesis by binding penicillin-binding proteins (transpeptidases), blocking peptidoglycan cross-linking",
+      "explanation": "Beta-lactams are bactericidal against actively dividing bacteria because a weakened cell wall causes lysis.",
+      "tags": ["pharmacology", "antibiotics"],
+      "distractors": ["Inhibits protein synthesis at the 30S ribosomal subunit", "Inhibits bacterial DNA gyrase", "Inhibits dihydrofolate reductase"]
+    },
+    {
+      "front": "What is the powerhouse of the cell?",
+      "back": "Mitochondria",
+      "explanation": "Mitochondria produce ATP via oxidative phosphorylation.",
+      "tags": ["cell biology"],
+      "distractors": ["Ribosome", "Golgi apparatus", "Lysosome"]
+    },
+    {
+      "front": "Which cranial nerve is responsible for facial sensation?",
+      "back": "Trigeminal nerve (CN V)",
+      "explanation": "CN V has three branches: ophthalmic, maxillary, and mandibular.",
+      "tags": ["anatomy", "neuroanatomy"],
+      "distractors": ["Facial nerve (CN VII)", "Glossopharyngeal nerve (CN IX)", "Vagus nerve (CN X)"]
+    },
+    {
+      "front": "What electrolyte abnormality causes peaked T waves on ECG?",
+      "back": "Hyperkalemia",
+      "explanation": "Severe hyperkalemia can progress to widened QRS complexes and sine-wave patterns.",
+      "tags": ["cardiology", "physiology"],
+      "distractors": ["Hypokalemia", "Hypercalcemia", "Hyponatremia"]
+    },
+    {
+      "front": "What is the first-line treatment for anaphylaxis?",
+      "back": "Intramuscular epinephrine",
+      "explanation": "Given in the anterolateral thigh; antihistamines and steroids are adjuncts, not first-line.",
+      "tags": ["pharmacology", "emergency medicine"],
+      "distractors": ["IV diphenhydramine", "Oral prednisone", "Nebulized albuterol"]
+    },
+    {
+      "front": "Which enzyme deficiency causes phenylketonuria (PKU)?",
+      "back": "Phenylalanine hydroxylase",
+      "explanation": "Leads to buildup of phenylalanine; managed with dietary restriction.",
+      "tags": ["biochemistry", "genetics"],
+      "distractors": ["Homogentisate oxidase", "Branched-chain ketoacid dehydrogenase", "Tyrosinase"]
+    },
+    {
+      "front": "What is the primary neurotransmitter released at the neuromuscular junction?",
+      "back": "Acetylcholine",
+      "explanation": "Binds nicotinic receptors on skeletal muscle to trigger contraction.",
+      "tags": ["physiology", "neuroscience"],
+      "distractors": ["Dopamine", "Norepinephrine", "GABA"]
+    },
+    {
+      "front": "Which vitamin deficiency causes scurvy?",
+      "back": "Vitamin C (ascorbic acid)",
+      "explanation": "Vitamin C is a cofactor for collagen synthesis; deficiency causes bleeding gums and poor wound healing.",
+      "tags": ["biochemistry", "nutrition"],
+      "distractors": ["Vitamin B12", "Vitamin D", "Vitamin K"]
+    },
+    {
+      "front": "What is the most common cause of community-acquired pneumonia?",
+      "back": "Streptococcus pneumoniae",
+      "explanation": "Presents classically with rust-colored sputum and lobar consolidation.",
+      "tags": ["microbiology", "infectious disease"],
+      "distractors": ["Haemophilus influenzae", "Mycoplasma pneumoniae", "Klebsiella pneumoniae"]
+    },
+    {
+      "front": "Which heart valve is located between the left atrium and left ventricle?",
+      "back": "Mitral valve",
+      "explanation": "Also called the bicuspid valve; regurgitation causes a holosystolic murmur at the apex.",
+      "tags": ["anatomy", "cardiology"],
+      "distractors": ["Tricuspid valve", "Aortic valve", "Pulmonary valve"]
+    },
+    {
+      "front": "What hormone is primarily responsible for stimulating uterine contractions during labor?",
+      "back": "Oxytocin",
+      "explanation": "Released from the posterior pituitary; also involved in milk let-down.",
+      "tags": ["physiology", "endocrinology"],
+      "distractors": ["Prolactin", "Progesterone", "Relaxin"]
+    },
+    {
+      "front": "Which type of hypersensitivity reaction is anaphylaxis?",
+      "back": "Type I (IgE-mediated)",
+      "explanation": "Mast cell and basophil degranulation causes rapid histamine release.",
+      "tags": ["immunology"],
+      "distractors": ["Type II (cytotoxic)", "Type III (immune complex)", "Type IV (delayed/cell-mediated)"]
+    },
+    {
+      "front": "What enzyme converts angiotensin I to angiotensin II?",
+      "back": "Angiotensin-converting enzyme (ACE)",
+      "explanation": "Occurs mainly in pulmonary capillaries; ACE inhibitors block this step.",
+      "tags": ["physiology", "renal"],
+      "distractors": ["Renin", "Aldosterone synthase", "Chymase"]
+    },
+    {
+      "front": "Which antibiotic class is generally avoided in pregnancy due to cartilage damage risk?",
+      "back": "Fluoroquinolones",
+      "explanation": "Animal studies show cartilage toxicity in developing joints.",
+      "tags": ["pharmacology", "obstetrics"],
+      "distractors": ["Penicillins", "Macrolides", "Cephalosporins"]
+    },
+    {
+      "front": "What is the classic triad of Wernicke encephalopathy?",
+      "back": "Confusion, ataxia, and ophthalmoplegia",
+      "explanation": "Caused by thiamine (B1) deficiency, often in alcohol use disorder.",
+      "tags": ["neurology"],
+      "distractors": ["Headache, fever, and neck stiffness", "Tremor, rigidity, and bradykinesia", "Weakness, numbness, and vision loss"]
+    },
+    {
+      "front": "Which cells in the pancreas secrete insulin?",
+      "back": "Beta cells of the islets of Langerhans",
+      "explanation": "Alpha cells secrete glucagon; delta cells secrete somatostatin.",
+      "tags": ["physiology", "endocrinology"],
+      "distractors": ["Alpha cells", "Delta cells", "Acinar cells"]
+    },
+    {
+      "front": "What is the most common inherited bleeding disorder?",
+      "back": "Von Willebrand disease",
+      "explanation": "Caused by deficient or defective von Willebrand factor, impairing platelet adhesion.",
+      "tags": ["hematology"],
+      "distractors": ["Hemophilia A", "Hemophilia B", "Factor V Leiden"]
+    },
+    {
+      "front": "Which organism is the most common cause of peptic ulcer disease?",
+      "back": "Helicobacter pylori",
+      "explanation": "Diagnosed via urea breath test, stool antigen, or biopsy; treated with triple/quadruple therapy.",
+      "tags": ["microbiology", "gastroenterology"],
+      "distractors": ["Escherichia coli", "Clostridioides difficile", "Campylobacter jejuni"]
+    },
+    {
+      "front": "What is the primary site of erythropoietin production in adults?",
+      "back": "Kidneys (peritubular interstitial cells)",
+      "explanation": "Chronic kidney disease is a common cause of normocytic anemia due to reduced EPO.",
+      "tags": ["physiology", "renal"],
+      "distractors": ["Liver", "Bone marrow", "Spleen"]
+    },
+    {
+      "front": "Which class of drugs is first-line treatment for major depressive disorder?",
+      "back": "SSRIs (selective serotonin reuptake inhibitors)",
+      "explanation": "Favored over TCAs and MAOIs due to a more favorable side-effect profile.",
+      "tags": ["pharmacology", "psychiatry"],
+      "distractors": ["Tricyclic antidepressants", "MAO inhibitors", "Benzodiazepines"]
+    }
+  ]
+}

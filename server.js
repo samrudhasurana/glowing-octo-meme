@@ -3,9 +3,12 @@ const crypto = require("crypto");
 const path = require("path");
 const { load, save } = require("./lib/store");
 const { freshSrsState, applyReview, isDue } = require("./lib/srs");
+const { seedDemoDataIfEmpty } = require("./lib/seed");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+seedDemoDataIfEmpty();
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "public")));
