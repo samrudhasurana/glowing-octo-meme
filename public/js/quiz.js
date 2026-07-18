@@ -4,6 +4,10 @@ const deckId = params.get("id");
 const deckTitleEl = document.getElementById("deck-title");
 const errorEl = document.getElementById("error");
 const progressTextEl = document.getElementById("progress-text");
+const setupAreaEl = document.getElementById("setup-area");
+const setupInfoEl = document.getElementById("setup-info");
+const sessionSizeInput = document.getElementById("session-size");
+const startSessionBtn = document.getElementById("start-session-btn");
 const quizAreaEl = document.getElementById("quiz-area");
 const doneAreaEl = document.getElementById("done-area");
 const questionTextEl = document.getElementById("question-text");
@@ -11,6 +15,7 @@ const optionsEl = document.getElementById("quiz-options");
 const explanationTextEl = document.getElementById("explanation-text");
 const nextBtn = document.getElementById("next-btn");
 
+let allQuestions = [];
 let questions = [];
 let index = 0;
 let total = 0;
@@ -82,6 +87,27 @@ function finish() {
   progressTextEl.textContent = "";
 }
 
+document.querySelectorAll("#setup-area [data-quick]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    sessionSizeInput.value = btn.dataset.quick === "all" ? allQuestions.length : btn.dataset.quick;
+  });
+});
+
+startSessionBtn.addEventListener("click", () => {
+  let n = parseInt(sessionSizeInput.value, 10);
+  if (!Number.isFinite(n) || n < 1) n = allQuestions.length;
+  n = Math.min(n, allQuestions.length);
+
+  questions = allQuestions.slice(0, n);
+  total = questions.length;
+  index = 0;
+  score = 0;
+
+  setupAreaEl.classList.add("hidden");
+  quizAreaEl.classList.remove("hidden");
+  showQuestion();
+});
+
 async function load() {
   if (!deckId) {
     showError("No deck specified.");
@@ -90,10 +116,11 @@ async function load() {
   try {
     const deck = await api.getDeck(deckId);
     deckTitleEl.textContent = `Quiz: ${deck.name}`;
-    questions = await api.getQuiz(deckId);
-    total = questions.length;
-    quizAreaEl.classList.remove("hidden");
-    showQuestion();
+    allQuestions = await api.getQuiz(deckId);
+    setupInfoEl.textContent = `${allQuestions.length} question${allQuestions.length === 1 ? "" : "s"} available in this deck.`;
+    sessionSizeInput.value = Math.min(20, allQuestions.length);
+    sessionSizeInput.max = allQuestions.length;
+    setupAreaEl.classList.remove("hidden");
   } catch (err) {
     showError(err.message);
   }
