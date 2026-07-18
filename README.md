@@ -5,7 +5,7 @@ repetition scheduling (SM-2, the algorithm behind Anki), multiple-choice
 quizzing, and an AI-assisted workflow for turning textbook chapters into
 flashcards via Claude.
 
-## Running it
+## Running it locally
 
 ```bash
 npm install
@@ -13,6 +13,30 @@ npm start
 ```
 
 Then open http://localhost:3000.
+
+## Sharing it online
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://dashboard.render.com/blueprint/new?repo=https://github.com/samrudhasurana/glowing-octo-meme)
+
+Click the button above (or go to [render.com](https://render.com) and sign in
+with GitHub, no credit card needed) to deploy this app on
+[Render](https://render.com)'s free tier and get a public `https://...onrender.com`
+link anyone can open in their browser — no download, no Terminal, nothing
+installed on their end.
+
+**Heads up about the free tier:**
+- It spins down after 15 minutes of no traffic, and takes about a minute to
+  wake back up on the next visit — normal for a free demo link, not
+  something to worry about.
+- Free web services don't get persistent disk storage, so `data/flashcards.json`
+  resets to whatever is in the GitHub repo every time the service restarts
+  (each spin-down/wake cycle, and every redeploy). That's fine for someone
+  quickly trying the app out, but it's not a place to keep flashcards you
+  care about long-term — for that, run it locally (see above), where your
+  data really does stick around on disk.
+- If you want a link that keeps data permanently, that needs a paid instance
+  with a persistent disk attached (a few dollars a month) instead of the
+  free tier — ask if you want help setting that up.
 
 The app is a small Express server plus static frontend. All your decks and
 cards live in [`data/flashcards.json`](data/flashcards.json) — a plain JSON
