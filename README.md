@@ -36,7 +36,7 @@ Each one shows the inflation calculation using the price and CPI on the cards.
 prank names like "Ben Dover". The server reads it and never sends it to phones, so a student
 just sees "Please choose a different name".
 
-- A plain line, such as `fuck`, blocks the word anywhere in a name, including `xXfuckXx`, `F.U.C.K`, `fuuuck` and `fvck`-style number swaps like `sh1t`.
+- A plain line, such as `fuck`, blocks the word anywhere in a name, including `xXfuckXx`, `F.U.C.K`, `fuuuck` and number swaps like `sh1t`.
 - A line starting with `=`, such as `=dick`, blocks it only as a separate word. "Dick" and "Big Dick" are blocked, but "Dickens" is allowed.
 - The repo is public on GitHub, so anyone who looks at the repo can read this file. To keep extra entries private, put them in a `BLOCKED_NAMES` environment variable on Render, comma-separated (e.g. `badword1,=badword2`).
 - If something slips through, **click the name** on the projector (in the lobby or on the leaderboard) to remove that player. They return to the join screen.
