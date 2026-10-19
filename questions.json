@@ -5,8 +5,14 @@
       "id": "survivor",
       "prompt": "SURVIVOR PRIZE MONEY: Adjusting for inflation, which is worth MORE?",
       "seconds": 60,
-      "a": { "year": 2000, "img": "survivor_a.jpg" },
-      "b": { "year": 2026, "img": "survivor_b.jpg" },
+      "a": {
+        "year": 2000,
+        "img": "survivor_a.jpg"
+      },
+      "b": {
+        "year": 2026,
+        "img": "survivor_b.jpg"
+      },
       "correct": "B",
       "explanation": ""
     },
@@ -14,8 +20,14 @@
       "id": "jordans",
       "prompt": "AIR JORDANS: Adjusting for inflation, which is cheaper?",
       "seconds": 60,
-      "a": { "year": 1985, "img": "jordans_a.jpg" },
-      "b": { "year": 2026, "img": "jordans_b.jpg" },
+      "a": {
+        "year": 1985,
+        "img": "jordans_a.jpg"
+      },
+      "b": {
+        "year": 2026,
+        "img": "jordans_b.jpg"
+      },
       "correct": "B",
       "explanation": "$56.95 in 1985 is $175.07 in 2026 dollars, versus $149.99 actually paid in 2026 — so the 2026 pair is cheaper."
     },
@@ -23,8 +35,14 @@
       "id": "tv",
       "prompt": "27\" TELEVISION: Adjusting for inflation, which is cheaper?",
       "seconds": 60,
-      "a": { "year": 1953, "img": "tv_a.jpg" },
-      "b": { "year": 2026, "img": "tv_b.jpg" },
+      "a": {
+        "year": 1953,
+        "img": "tv_a.jpg"
+      },
+      "b": {
+        "year": 2026,
+        "img": "tv_b.jpg"
+      },
       "correct": "B",
       "explanation": ""
     },
@@ -32,26 +50,44 @@
       "id": "house",
       "prompt": "LOS ANGELES HOUSE: Adjusting for inflation, which is cheaper?",
       "seconds": 60,
-      "a": { "year": 1976, "img": "house_a.jpg" },
-      "b": { "year": 2022, "img": "house_b.jpg" },
+      "a": {
+        "year": 1976,
+        "img": "house_a.jpg"
+      },
+      "b": {
+        "year": 2022,
+        "img": "house_b.jpg"
+      },
       "correct": "A",
       "explanation": ""
     },
     {
-      "id": "lego",
-      "prompt": "LEGO X-WING FIGHTER: Adjusting for inflation, which is cheaper?",
+      "id": "bigmac",
+      "prompt": "BIG MAC: Adjusting for inflation, which is cheaper?",
       "seconds": 60,
-      "a": { "year": 1999, "img": "lego_a.jpg" },
-      "b": { "year": 2026, "img": "lego_b.jpg" },
+      "a": {
+        "year": 1968,
+        "img": "bigmac_a.jpg"
+      },
+      "b": {
+        "year": 2026,
+        "img": "bigmac_b.jpg"
+      },
       "correct": "A",
-      "explanation": ""
+      "explanation": "$0.49 in 1968 is $4.65 in 2026 dollars (0.49 × 332 ÷ 35), versus $6.72 actually paid in 2026 — so the 1968 Big Mac is cheaper."
     },
     {
       "id": "ford",
       "prompt": "FORD SEDAN: Adjusting for inflation, which is cheaper?",
       "seconds": 60,
-      "a": { "year": 1909, "img": "ford_a.jpg" },
-      "b": { "year": 2020, "img": "ford_b.jpg" },
+      "a": {
+        "year": 1909,
+        "img": "ford_a.jpg"
+      },
+      "b": {
+        "year": 2020,
+        "img": "ford_b.jpg"
+      },
       "correct": "B",
       "explanation": ""
     }

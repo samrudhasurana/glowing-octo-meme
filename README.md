@@ -9,9 +9,9 @@ leaderboard appears after every question. There is no player cap and no npm depe
 - Prices and CPI info are in the **card images** (`img/<id>_a.jpg`, `img/<id>_b.jpg`), not in the answer text.
 - Scoring: a correct answer earns 1000 points if instant, falling to 500 at the buzzer. A wrong answer or no answer earns 0.
 
-## Add the card images (required)
+## Card images
 
-The repo ships **without** card images. Put one image per option in `img/`, named after
+All card images are in `img/`. To change one, replace the file; names follow
 `questions.json`:
 
 | Question | Option A | Option B |
@@ -20,7 +20,7 @@ The repo ships **without** card images. Put one image per option in `img/`, name
 | Air Jordans | `jordans_a.jpg` (1985) | `jordans_b.jpg` (2026) |
 | 27" television | `tv_a.jpg` (1953) | `tv_b.jpg` (2026) |
 | Los Angeles house | `house_a.jpg` (1976) | `house_b.jpg` (2022) |
-| Lego X-Wing | `lego_a.jpg` (1999) | `lego_b.jpg` (2026) |
+| Big Mac | `bigmac_a.jpg` (1968) | `bigmac_b.jpg` (2026) |
 | Ford sedan | `ford_a.jpg` (1909) | `ford_b.jpg` (2020) |
 
 JPEG or PNG both work (change the file name in `questions.json` if you use `.png`). About
@@ -28,7 +28,7 @@ JPEG or PNG both work (change the file name in `questions.json` if you use `.png
 screen and the startup log name the missing file.
 
 Explanation text shown after each answer is in `questions.json` → `explanation`. Only the
-Air Jordans one is filled in. Copy the others from the MRU interactive.
+Air Jordans and Big Mac ones are filled in. Copy the others from the MRU interactive.
 
 ## Run locally
 
