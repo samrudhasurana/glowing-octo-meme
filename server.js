@@ -20,6 +20,14 @@ const KEEPALIVE_MS = 20000;
 const quiz = JSON.parse(fs.readFileSync(path.join(ROOT, 'questions.json'), 'utf8'));
 const questions = quiz.questions;
 
+// Optional music overrides: audio/lobby.mp3, audio/question.mp3, audio/reveal.mp3, audio/final.mp3
+let audioFiles = [];
+try {
+  audioFiles = fs.readdirSync(path.join(ROOT, 'audio'))
+    .filter(f => /^(lobby|question|reveal|final)\.mp3$/.test(f))
+    .map(f => f.replace(/\.mp3$/, ''));
+} catch (_) { /* no audio folder */ }
+
 // ---- game state (in memory) ----------------------------------------------
 
 const players = new Map(); // pid -> {pid, name, score, lastPoints}
@@ -96,6 +104,7 @@ function snapshot(client) {
   if (client.host) {
     s.players = ranked.map(r => r.name);
     s.totalQuestions = questions.length;
+    s.audioFiles = audioFiles;
   } else {
     const me = ranked.find(r => r.pid === client.pid);
     if (me) {
@@ -262,15 +271,31 @@ function readBody(req) {
   });
 }
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.mp3': 'audio/mpeg' };
 
-function serveFile(res, file, cache) {
+function serveFile(res, file, cache, req) {
   fs.readFile(file, (err, buf) => {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); return res.end('Not found'); }
-    res.writeHead(200, {
+    const headers = {
       'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'Cache-Control': cache ? 'public, max-age=300' : 'no-store',
-    });
+      'Accept-Ranges': 'bytes',
+    };
+    // Safari needs byte-range support to play audio.
+    const m = req && /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m && (m[1] || m[2])) {
+      let start = m[1] ? Number(m[1]) : buf.length - Number(m[2]);
+      let end = m[1] && m[2] ? Number(m[2]) : buf.length - 1;
+      start = Math.max(0, start);
+      end = Math.min(end, buf.length - 1);
+      if (start > end) {
+        res.writeHead(416, { 'Content-Range': `bytes */${buf.length}` });
+        return res.end();
+      }
+      res.writeHead(206, { ...headers, 'Content-Range': `bytes ${start}-${end}/${buf.length}`, 'Content-Length': end - start + 1 });
+      return res.end(buf.subarray(start, end + 1));
+    }
+    res.writeHead(200, { ...headers, 'Content-Length': buf.length });
     res.end(buf);
   });
 }
@@ -316,6 +341,9 @@ const server = http.createServer(async (req, res) => {
       }
       if (/^\/img\/[a-z0-9_.-]+\.(jpe?g|png)$/i.test(p) && !p.includes('..')) {
         return serveFile(res, path.join(ROOT, p), true);
+      }
+      if (/^\/audio\/[a-z0-9_-]+\.mp3$/i.test(p)) {
+        return serveFile(res, path.join(ROOT, p), true, req);
       }
       if (p === '/api/events') return openEvents(req, res, url);
       if (p === '/api/info') {
