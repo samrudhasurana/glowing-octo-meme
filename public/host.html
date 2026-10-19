@@ -47,6 +47,9 @@
   .bars { display:flex; gap:12px; justify-content:center; font-weight:800; font-size:1.2rem; }
   .bars span { padding:6px 14px; border-radius:8px; }
   .hint { text-align:center; color:var(--muted); font-size:.9rem; }
+  header .tools button#btnSound { color:#fff; border-color:#fff; }
+  header .tools button#btnSound.off { color:var(--muted); border-color:#6b5fb0; }
+  header .tools button#btnSound.locked { background:#ffd54f; color:#222; border-color:#ffd54f; font-weight:700; }
 </style>
 </head>
 <body>
@@ -54,6 +57,7 @@
   <span class="title" id="title">Inflation Quiz</span>
   <span class="tools">
     <span id="qinfo" class="hint"></span>
+    <button id="btnSound" class="locked" title="Music on/off (M)">🔈 Click to enable sound</button>
     <button id="btnReset" title="Back to lobby, keep players, zero scores">Reset scores</button>
     <button id="btnClear" title="Remove all players">Clear players</button>
   </span>
@@ -67,7 +71,205 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
   let joinUrls = local ? [] : [location.origin.replace(/^https?:\/\//, '')];
-  let state = null, offset = 0, tick = null, renderedKey = '';
+  let state = null, offset = 0, tick = null, renderedKey = '', sceneKey = '', lastSecond = null;
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+  };
+
+  // ---- music ----------------------------------------------------------------
+  // Original Kahoot-style loops synthesized with the Web Audio API (no files needed).
+  // Drop audio/lobby.mp3, question.mp3, reveal.mp3 or final.mp3 on the server to override.
+  const Music = (() => {
+    let ctx = null, master = null, noise = null, loopTimer = null, laterTimer = null, el = null;
+    let loop = null, step = 0, nextTime = 0, scene = null;
+    let muted = store.get('iq_muted') === '1';
+    let files = [];
+    const hz = n => 440 * Math.pow(2, (n - 69) / 12);
+
+    // chords are MIDI notes; arp values index chord tones (3 = root an octave up, …), null = rest
+    const LOOPS = {
+      lobby: {
+        bpm: 112, gain: 0.8,
+        chords: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]],
+        kick: [0, 7, 8], clap: [4, 12], hat: [2, 6, 10, 14], hatVol: 0.25,
+        bass: [0, 3, 6, 8, 11, 14], bassLen: 0.18,
+        arp: [3, null, 4, null, 5, null, 4, 3, null, 2, null, 3, 4, null, 2, null], lead: 'triangle', leadVol: 0.22, leadLen: 0.22,
+      },
+      question: {
+        bpm: 140, gain: 0.8,
+        chords: [[62, 65, 69], [62, 65, 69], [58, 62, 65], [60, 64, 67]],
+        kick: [0, 4, 8, 12], clap: [4, 12], hat: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], hatVol: 0.12,
+        bass: [0, 2, 4, 6, 8, 10, 12, 14], bassLen: 0.11,
+        arp: [3, 4, 5, 4, 3, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2], lead: 'square', leadVol: 0.07, leadLen: 0.09,
+      },
+    };
+
+    function init() {
+      if (ctx) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ctx = new AC();
+      const comp = ctx.createDynamicsCompressor();
+      master = ctx.createGain();
+      master.gain.value = muted ? 0 : 0.5;
+      master.connect(comp);
+      comp.connect(ctx.destination);
+      noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+
+    function env(t, vol, attack, len) {
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + attack);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      g.connect(master);
+      return g;
+    }
+    function tone(t, freq, type, vol, len, cutoff) {
+      const o = ctx.createOscillator();
+      o.type = type;
+      o.frequency.value = freq;
+      let out = env(t, vol, 0.005, len);
+      if (cutoff) {
+        const f = ctx.createBiquadFilter();
+        f.type = 'lowpass';
+        f.frequency.value = cutoff;
+        f.connect(out);
+        out = f;
+      }
+      o.connect(out);
+      o.start(t);
+      o.stop(t + len + 0.05);
+    }
+    function burst(t, filterType, freq, vol, len) {
+      const src = ctx.createBufferSource();
+      src.buffer = noise;
+      const f = ctx.createBiquadFilter();
+      f.type = filterType;
+      f.frequency.value = freq;
+      src.connect(f);
+      f.connect(env(t, vol, 0.002, len));
+      src.start(t);
+      src.stop(t + len + 0.05);
+    }
+    function kick(t) {
+      const o = ctx.createOscillator();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+      o.connect(env(t, 0.9, 0.003, 0.18));
+      o.start(t);
+      o.stop(t + 0.25);
+    }
+    const clap = (t, vol = 0.35) => burst(t, 'bandpass', 1500, vol, 0.12);
+    const hat = (t, vol) => burst(t, 'highpass', 7000, vol, 0.04);
+    const crash = t => burst(t, 'highpass', 4000, 0.3, 1.2);
+
+    function playStep(t, L, s) {
+      const i = s % 16;
+      const ch = L.chords[Math.floor(s / 16) % L.chords.length];
+      if (L.kick.includes(i)) kick(t);
+      if (L.clap.includes(i)) clap(t);
+      if (L.hat.includes(i)) hat(t, L.hatVol);
+      if (L.bass.includes(i)) tone(t, hz(ch[0] - 24), 'sawtooth', 0.35, L.bassLen, 500);
+      const a = L.arp[i];
+      if (a != null) tone(t, hz(ch[a % 3] + 12 * Math.floor(a / 3)), L.lead, L.leadVol, L.leadLen, 3000);
+    }
+
+    function stopAll() {
+      clearInterval(loopTimer); loopTimer = null; loop = null;
+      clearTimeout(laterTimer); laterTimer = null;
+      if (el) { el.pause(); el = null; }
+    }
+
+    function startLoop(name) {
+      if (files.includes(name)) return playFile(name, true);
+      loop = LOOPS[name];
+      step = 0;
+      nextTime = ctx.currentTime + 0.05;
+      loopTimer = setInterval(() => {
+        const sixteenth = 60 / loop.bpm / 4;
+        while (nextTime < ctx.currentTime + 0.12) {
+          playStep(nextTime, loop, step++);
+          nextTime += sixteenth;
+        }
+      }, 25);
+    }
+
+    function playFile(name, repeat) {
+      el = new Audio('/audio/' + name + '.mp3');
+      el.loop = repeat;
+      el.volume = 0.7;
+      el.play().catch(() => {});
+    }
+
+    // One-shot jingles; the lobby loop resumes softly afterwards.
+    function sting(name) {
+      const t = ctx.currentTime + 0.05;
+      let len;
+      if (files.includes(name)) {
+        playFile(name, false);
+        len = 4;
+      } else if (name === 'reveal') {
+        kick(t); crash(t);
+        [72, 76, 79, 84].forEach((n, i) => tone(t + i * 0.09, hz(n), 'square', 0.12, i === 3 ? 0.8 : 0.15, 4000));
+        tone(t, hz(48), 'sawtooth', 0.3, 0.9, 600);
+        len = 2.5;
+      } else { // final: drum roll, then fanfare
+        for (let i = 0; i < 28; i++) clap(t + i * 0.06, 0.05 + 0.3 * i / 28);
+        const f = t + 1.7;
+        kick(f); crash(f);
+        [[67, 0], [67, 0.18], [67, 0.36], [72, 0.54]].forEach(([n, d]) => tone(f + d, hz(n), 'sawtooth', 0.2, 0.16, 3000));
+        [60, 64, 67, 72].forEach(n => tone(f + 0.72, hz(n), 'sawtooth', 0.12, 1.6, 2500));
+        tone(f + 0.72, hz(36), 'sawtooth', 0.3, 1.6, 400);
+        len = 4.5;
+      }
+      laterTimer = setTimeout(() => { stopAll(); startLoop('lobby'); }, len * 1000);
+    }
+
+    function start() {
+      stopAll();
+      if (!ctx || muted || !scene) return;
+      if (ctx.state === 'suspended') ctx.resume();
+      if (scene === 'reveal' || scene === 'final') sting(scene);
+      else startLoop(scene);
+    }
+
+    function updateButton() {
+      const b = document.getElementById('btnSound');
+      b.className = !ctx ? 'locked' : muted ? 'off' : '';
+      b.textContent = !ctx ? '🔈 Click to enable sound' : muted ? '🔇 Music off' : '🔊 Music on';
+    }
+
+    return {
+      unlocked: () => !!ctx,
+      unlock() { if (ctx) return; init(); updateButton(); start(); },
+      toggle() {
+        if (!ctx) { muted = false; store.set('iq_muted', '0'); this.unlock(); return; }
+        muted = !muted;
+        store.set('iq_muted', muted ? '1' : '0');
+        master.gain.value = muted ? 0 : 0.5;
+        updateButton();
+        start();
+      },
+      setFiles(f) { files = f || []; },
+      scene(name) { scene = name; start(); },
+      tick(urgent) {
+        if (!ctx || muted) return;
+        const t = ctx.currentTime + 0.01;
+        tone(t, urgent ? 1760 : 1320, 'square', urgent ? 0.18 : 0.1, 0.05);
+      },
+    };
+  })();
+
+  document.getElementById('btnSound').onclick = () => Music.toggle();
+  // Browsers only allow sound after a click or key press on the page.
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, (e) => {
+    if (e.target.closest && e.target.closest('#btnSound')) return;
+    Music.unlock();
+  }));
 
   if (local) {
     fetch('/api/info?key=' + encodeURIComponent(key)).then(r => r.json()).then(d => {
@@ -89,6 +291,7 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || !state) return;
+    if (e.key === 'm' || e.key === 'M') { Music.toggle(); return; }
     if (e.key !== ' ' && e.key !== 'Enter') return;
     e.preventDefault();
     if (state.phase === 'lobby') act('start');
@@ -131,6 +334,9 @@
     document.getElementById('title').textContent = s.title;
     document.getElementById('qinfo').textContent = s.question ? `Question ${s.question.index + 1} / ${s.question.total}` : `${s.totalQuestions} questions`;
     if (s.phase !== 'question') stopTimer();
+    Music.setFiles(s.audioFiles);
+    const sk = s.phase + (s.question ? s.question.index : '');
+    if (sk !== sceneKey) { sceneKey = sk; lastSecond = null; Music.scene(s.phase); }
 
     if (s.phase === 'lobby') {
       renderedKey = 'lobby';
@@ -142,7 +348,7 @@
         <div class="count">${s.playerCount} player${s.playerCount === 1 ? '' : 's'} joined</div>
         <div class="names">${s.players.map(n => `<span>${esc(n)}</span>`).join('')}</div>
         <button class="go" id="go" ${s.playerCount ? '' : 'disabled style="opacity:.5"'}>Start quiz ▶</button>
-        <p class="hint">Space / Enter = Start → Reveal now → Next</p>`;
+        <p class="hint">Space / Enter = Start → Reveal now → Next · M = music on/off</p>`;
       document.getElementById('go').onclick = () => act('start');
       return;
     }
@@ -165,7 +371,12 @@
       }
       document.getElementById('ans').textContent = `${s.answeredCount}/${s.playerCount}`;
       const t = document.getElementById('timer');
-      const upd = () => { t.textContent = secondsLeft(); };
+      const upd = () => {
+        const sec = secondsLeft();
+        t.textContent = sec;
+        if (sec !== lastSecond && lastSecond !== null && sec <= 10 && sec > 0) Music.tick(sec <= 5);
+        lastSecond = sec;
+      };
       upd();
       if (!tick) tick = setInterval(upd, 250);
       return;

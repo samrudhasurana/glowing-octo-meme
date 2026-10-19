@@ -65,6 +65,26 @@ loses players and scores.
 - **Reset scores** goes back to the lobby and keeps players. **Clear players** removes everyone.
 - If a student reloads the page, they stay in the game (their ID is saved in `localStorage`).
 
+## Music
+
+The projector page plays original Kahoot-style music. It's generated in the browser, so there are no files to download:
+
+- **Lobby:** a relaxed loop while students join.
+- **Question:** a faster, tense loop, with clock ticks in the last 10 seconds (sharper in the last 5).
+- **Reveal:** a "ta-da" jingle, then the lobby loop again under the leaderboard.
+- **Final:** a drum roll and fanfare.
+
+Browsers only allow sound after you click on the page, so click **🔈 Click to enable sound** (top
+right) once after opening the host link. Any click or key press also works, including pressing
+**Start**. The same button (or the **M** key) turns music on and off, and the setting is remembered.
+Music plays only on the projector, never on students' phones. Sound comes out of whatever the
+projector computer is connected to, so check the room speakers.
+
+**Using your own music instead:** put royalty-free MP3s in `audio/` with these names:
+`lobby.mp3` and `question.mp3` (looped), and `reveal.mp3` and `final.mp3` (played once). You can
+use any of them; the rest stay synthesized. Restart the server or redeploy afterwards. Don't use
+Kahoot's actual music, because it's copyrighted.
+
 ## Load test
 
 ```bash
@@ -84,6 +104,7 @@ questions.json     title + questions (prompt, years, image names, correct answer
 public/play.html   student phone page
 public/host.html   projector page
 img/               card images
+audio/             optional music MP3s (see Music)
 scripts/loadtest.js
 render.yaml        Render blueprint
 HANDOFF.md         project notes and open items
