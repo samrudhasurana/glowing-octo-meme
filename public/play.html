@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Inflation Quiz</title>
+<style>
+  :root { --bg:#1b1340; --panel:#2a1f5c; --text:#fff; --muted:#c9c2ee; --a:#e21b3c; --b:#1368ce; --ok:#26890c; --bad:#c0392b; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  body { min-height:100vh; display:flex; flex-direction:column; }
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:rgba(0,0,0,.25); font-weight:600; }
+  main { flex:1; padding:16px; max-width:560px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  h1 { font-size:1.6rem; margin:.2em 0; text-align:center; }
+  .center { text-align:center; }
+  .muted { color:var(--muted); }
+  input { width:100%; font-size:1.3rem; padding:14px; border-radius:10px; border:0; }
+  button { font:inherit; cursor:pointer; border:0; border-radius:12px; color:#fff; }
+  .primary { background:#46178f; font-size:1.3rem; padding:14px; width:100%; font-weight:700; }
+  .err { color:#ff9a9a; min-height:1.2em; text-align:center; }
+  .prompt { font-size:1.15rem; font-weight:700; text-align:center; line-height:1.3; }
+  .timer { font-size:2.2rem; font-weight:800; text-align:center; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .card { background:var(--panel); border-radius:12px; overflow:hidden; border:4px solid transparent; }
+  .card img { display:block; width:100%; height:auto; }
+  .card .ph { aspect-ratio:3/4; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:1.6rem; font-weight:800; }
+  .card.right { border-color:var(--ok); }
+  .card.dim { opacity:.45; }
+  .tag { padding:4px 8px; font-weight:800; }
+  .tag.A { background:var(--a); } .tag.B { background:var(--b); }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .choice { font-size:2.6rem; font-weight:900; padding:24px 0; }
+  .choice.A { background:var(--a); } .choice.B { background:var(--b); }
+  .choice:disabled { opacity:.35; }
+  .choice.picked { opacity:1; outline:5px solid #fff; }
+  .banner { border-radius:14px; padding:22px; text-align:center; font-size:1.6rem; font-weight:800; }
+  .banner.ok { background:var(--ok); } .banner.bad { background:var(--bad); } .banner.wait { background:var(--panel); }
+  .big { font-size:3rem; font-weight:900; }
+  ol.board { list-style:none; padding:0; margin:0; }
+  ol.board li { display:flex; justify-content:space-between; background:var(--panel); margin:6px 0; padding:10px 14px; border-radius:10px; font-weight:600; }
+  ol.board li.me { outline:3px solid #ffd54f; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<header><span id="hdrName">Inflation Quiz</span><span id="hdrScore"></span></header>
+<main id="app"><p class="center muted">Connecting…</p></main>
+
+<script>
+(() => {
+  const app = document.getElementById('app');
+  const hdrName = document.getElementById('hdrName');
+  const hdrScore = document.getElementById('hdrScore');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (_) {} },
+  };
+
+  let pid = store.get('iq_pid');
+  let es = null;
+  let state = null;
+  let offset = 0;        // server clock minus local clock
+  let tick = null;
+  let pending = null;    // choice sent but not yet confirmed
+  let renderedKey = '';
+
+  function showJoin(msg) {
+    stopTimer();
+    if (es) { es.close(); es = null; }
+    hdrName.textContent = 'Inflation Quiz';
+    hdrScore.textContent = '';
+    renderedKey = 'join';
+    app.innerHTML = `
+      <h1>Join the quiz</h1>
+      <form id="f" autocomplete="off">
+        <input id="name" maxlength="16" placeholder="Your name" value="${esc(store.get('iq_name') || '')}" autofocus>
+        <p class="err" id="err">${esc(msg || '')}</p>
+        <button class="primary" type="submit">Join</button>
+      </form>`;
+    const f = document.getElementById('f');
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const err = document.getElementById('err');
+      if (!name) { err.textContent = 'Please enter a name'; return; }
+      f.querySelector('button').disabled = true;
+      try {
+        const r = await fetch('/api/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+        const d = await r.json();
+        if (!r.ok) { err.textContent = d.error || 'Could not join'; f.querySelector('button').disabled = false; return; }
+        pid = d.pid;
+        store.set('iq_pid', d.pid);
+        store.set('iq_name', d.name);
+        connect();
+      } catch (_) {
+        err.textContent = 'Network problem — try again';
+        f.querySelector('button').disabled = false;
+      }
+    };
+  }
+
+  function connect() {
+    if (es) es.close();
+    es = new EventSource('/api/events?pid=' + encodeURIComponent(pid));
+    es.onmessage = (ev) => {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === 'unknown') {
+        store.del('iq_pid');
+        pid = null;
+        showJoin('The game was reset — please join again.');
+        return;
+      }
+      offset = msg.now - Date.now();
+      state = msg;
+      render();
+    };
+  }
+
+  function stopTimer() { if (tick) { clearInterval(tick); tick = null; } }
+  function secondsLeft() { return Math.max(0, Math.ceil((state.endsAt - (Date.now() + offset)) / 1000)); }
+
+  function card(q, k) {
+    const o = q.options[k];
+    const body = o.img
+      ? `<img src="${esc(o.img)}" alt="Option ${k}, ${esc(o.year)}">`
+      : `<div class="ph">${esc(o.year)}</div>`;
+    let cls = 'card';
+    if (q.correct) cls += q.correct === k ? ' right' : ' dim';
+    return `<div class="${cls}"><div class="tag ${k}">${k}</div>${body}</div>`;
+  }
+
+  function board(top, me) {
+    return `<ol class="board">${top.map(t =>
+      `<li class="${me && t.name === me.name ? 'me' : ''}"><span>${t.rank}. ${esc(t.name)}</span><span>${t.score}</span></li>`).join('')}</ol>`;
+  }
+
+  function render() {
+    const s = state;
+    const you = s.you;
+    if (!you) return;
+    hdrName.textContent = you.name;
+    hdrScore.textContent = you.score + ' pts';
+
+    if (s.phase !== 'question') { stopTimer(); pending = null; }
+
+    if (s.phase === 'lobby') {
+      renderedKey = 'lobby';
+      app.innerHTML = `
+        <h1>You're in!</h1>
+        <div class="banner wait">Look at the screen —<br>the quiz starts soon.</div>
+        <p class="center muted">${s.playerCount} player${s.playerCount === 1 ? '' : 's'} joined</p>`;
+      return;
+    }
+
+    const q = s.question;
+
+    if (s.phase === 'question') {
+      const choice = you.choice || pending;
+      const key = `q${q.index}:${choice || ''}`;
+      if (renderedKey !== key) {
+        renderedKey = key;
+        app.innerHTML = `
+          <p class="center muted">Question ${q.index + 1} of ${q.total}</p>
+          <div class="prompt">${esc(q.prompt)}</div>
+          <div class="timer" id="timer"></div>
+          <div class="cards">${card(q, 'A')}${card(q, 'B')}</div>
+          ${choice
+            ? `<div class="banner wait">Answer locked in: <b>${choice}</b><br><span class="muted" style="font-size:1rem">Waiting for the others…</span></div>`
+            : `<div class="choices">
+                 <button class="choice A" data-c="A">A</button>
+                 <button class="choice B" data-c="B">B</button>
+               </div>`}`;
+        app.querySelectorAll('.choice').forEach(b => b.onclick = () => submit(b.dataset.c));
+      }
+      const t = document.getElementById('timer');
+      const upd = () => { if (t) t.textContent = secondsLeft(); };
+      upd();
+      if (!tick) tick = setInterval(upd, 250);
+      return;
+    }
+
+    if (s.phase === 'reveal') {
+      renderedKey = 'reveal' + q.index;
+      const banner = you.correct
+        ? `<div class="banner ok">Correct!<div class="big">+${you.lastPoints}</div></div>`
+        : `<div class="banner bad">${you.answered ? 'Not this time' : 'No answer'}<div class="big">+0</div></div>`;
+      app.innerHTML = `
+        ${banner}
+        <div class="banner wait">You're <b>#${you.rank}</b> of ${you.of} · ${you.score} pts</div>
+        <div class="prompt">Answer: ${q.correct}</div>
+        <div class="cards">${card(q, 'A')}${card(q, 'B')}</div>
+        ${q.explanation ? `<p class="center">${esc(q.explanation)}</p>` : ''}
+        <h1>Top 5</h1>${board(s.top, you)}`;
+      return;
+    }
+
+    if (s.phase === 'final') {
+      renderedKey = 'final';
+      app.innerHTML = `
+        <h1>Final results</h1>
+        <div class="banner ok">You finished <b>#${you.rank}</b> of ${you.of}<div class="big">${you.score}</div>points</div>
+        <h1>Top 10</h1>${board(s.top, you)}`;
+    }
+  }
+
+  async function submit(choice) {
+    if (pending || (state.you && state.you.choice)) return;
+    pending = choice;
+    render();
+    try {
+      const r = await fetch('/api/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pid, choice }) });
+      if (!r.ok && r.status !== 409) { pending = null; render(); }
+    } catch (_) {
+      pending = null;
+      renderedKey = '';
+      render();
+      alert('Network problem — tap your answer again.');
+    }
+  }
+
+  if (pid) connect(); else showJoin();
+})();
+</script>
+</body>
+</html>
