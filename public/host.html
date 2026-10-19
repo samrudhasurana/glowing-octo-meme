@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inflation Quiz — Host</title>
+<style>
+  :root { --bg:#1b1340; --panel:#2a1f5c; --text:#fff; --muted:#c9c2ee; --a:#e21b3c; --b:#1368ce; --ok:#26890c; --accent:#ffd54f; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  body { min-height:100vh; display:flex; flex-direction:column; }
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 24px; background:rgba(0,0,0,.3); }
+  header .title { font-weight:800; font-size:1.2rem; }
+  header .tools button { background:transparent; border:1px solid #6b5fb0; color:var(--muted); font-size:.85rem; padding:4px 10px; margin-left:6px; }
+  main { flex:1; padding:20px 32px; display:flex; flex-direction:column; gap:18px; max-width:1400px; width:100%; margin:0 auto; }
+  button { font:inherit; cursor:pointer; border:0; border-radius:10px; color:#fff; }
+  .go { background:#46178f; font-size:1.4rem; font-weight:800; padding:14px 36px; align-self:center; }
+  .go:hover { background:#5a22b0; }
+  .join { background:#fff; color:#222; border-radius:16px; padding:18px 28px; text-align:center; }
+  .join .url { font-size:clamp(1.8rem, 4.5vw, 3.6rem); font-weight:900; word-break:break-all; }
+  .join .lbl { font-size:1.2rem; color:#555; }
+  .count { font-size:1.6rem; font-weight:800; text-align:center; }
+  .names { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .names span { background:var(--panel); padding:8px 16px; border-radius:20px; font-weight:700; font-size:1.2rem; }
+  .prompt { font-size:clamp(1.5rem, 3vw, 2.6rem); font-weight:800; text-align:center; background:#fff; color:#222; border-radius:12px; padding:14px 20px; }
+  .row { display:grid; grid-template-columns:140px 1fr 140px; gap:20px; align-items:center; }
+  .timer { width:120px; height:120px; border-radius:50%; background:#864cbf; display:flex; align-items:center; justify-content:center; font-size:3rem; font-weight:900; }
+  .answered { text-align:center; font-size:1.3rem; font-weight:700; }
+  .answered b { display:block; font-size:3rem; }
+  .cards { display:flex; gap:28px; justify-content:center; align-items:flex-start; }
+  .card { background:var(--panel); border-radius:14px; overflow:hidden; border:6px solid transparent; max-width:42vh; width:100%; transition:opacity .3s; }
+  .card img { display:block; width:100%; height:auto; max-height:52vh; object-fit:contain; background:#fff; }
+  .card .ph { aspect-ratio:3/4; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:3rem; font-weight:900; gap:10px; }
+  .card .ph small { font-size:.85rem; font-weight:400; color:var(--muted); padding:0 10px; text-align:center; }
+  .tag { padding:6px 12px; font-size:1.6rem; font-weight:900; display:flex; justify-content:space-between; }
+  .tag.A { background:var(--a); } .tag.B { background:var(--b); }
+  .card.right { border-color:var(--ok); box-shadow:0 0 30px rgba(38,137,12,.7); }
+  .card.dim { opacity:.4; }
+  .explain { text-align:center; font-size:1.4rem; background:var(--panel); border-radius:12px; padding:14px 20px; }
+  .reveal-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:28px; align-items:start; }
+  h2 { margin:.2em 0; text-align:center; font-size:1.8rem; }
+  ol.board { list-style:none; padding:0; margin:0; }
+  ol.board li { display:grid; grid-template-columns:50px 1fr auto auto; gap:14px; align-items:center; background:var(--panel); margin:8px 0; padding:10px 18px; border-radius:10px; font-size:1.4rem; font-weight:700; }
+  ol.board li .rk { color:var(--accent); }
+  ol.board li .gain { color:#8fe37a; font-size:1rem; }
+  ol.board.final li:first-child { background:#b8860b; font-size:1.8rem; }
+  .bars { display:flex; gap:12px; justify-content:center; font-weight:800; font-size:1.2rem; }
+  .bars span { padding:6px 14px; border-radius:8px; }
+  .hint { text-align:center; color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<header>
+  <span class="title" id="title">Inflation Quiz</span>
+  <span class="tools">
+    <span id="qinfo" class="hint"></span>
+    <button id="btnReset" title="Back to lobby, keep players, zero scores">Reset scores</button>
+    <button id="btnClear" title="Remove all players">Clear players</button>
+  </span>
+</header>
+<main id="app"><p class="hint">Connecting…</p></main>
+
+<script>
+(() => {
+  const key = new URLSearchParams(location.search).get('key') || '';
+  const app = document.getElementById('app');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+  let joinUrls = local ? [] : [location.origin.replace(/^https?:\/\//, '')];
+  let state = null, offset = 0, tick = null, renderedKey = '';
+
+  if (local) {
+    fetch('/api/info?key=' + encodeURIComponent(key)).then(r => r.json()).then(d => {
+      joinUrls = (d.addresses || []).map(a => `http://${a}:${d.port}`);
+      if (!joinUrls.length) joinUrls = [location.origin];
+      renderedKey = '';
+      if (state) render();
+    }).catch(() => {});
+  }
+
+  async function act(action) {
+    try {
+      await fetch('/api/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, action }) });
+    } catch (_) { alert('Network problem — try again.'); }
+  }
+
+  document.getElementById('btnReset').onclick = () => { if (confirm('Go back to the lobby and set every score to 0? Players stay joined.')) act('reset'); };
+  document.getElementById('btnClear').onclick = () => { if (confirm('Remove ALL players? They will need to join again.')) act('clear'); };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || !state) return;
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    e.preventDefault();
+    if (state.phase === 'lobby') act('start');
+    else if (state.phase === 'question') act('reveal');
+    else if (state.phase === 'reveal') act('next');
+  });
+
+  const es = new EventSource('/api/events?key=' + encodeURIComponent(key));
+  es.onmessage = (ev) => {
+    const msg = JSON.parse(ev.data);
+    if (msg.type !== 'state') return;
+    offset = msg.now - Date.now();
+    state = msg;
+    render();
+  };
+
+  function stopTimer() { if (tick) { clearInterval(tick); tick = null; } }
+  const secondsLeft = () => Math.max(0, Math.ceil((state.endsAt - (Date.now() + offset)) / 1000));
+
+  function card(q, k) {
+    const o = q.options[k];
+    const body = o.img
+      ? `<img src="${esc(o.img)}" alt="Option ${k}">`
+      : `<div class="ph">${esc(o.year)}<small>Card image missing:<br>img/${esc(o.file || '')}</small></div>`;
+    let cls = 'card';
+    if (q.correct) cls += q.correct === k ? ' right' : ' dim';
+    const n = state.counts ? `<span>${state.counts[k]}</span>` : '';
+    return `<div class="${cls}"><div class="tag ${k}"><span>${k}</span>${n}</div>${body}</div>`;
+  }
+
+  function board(top, cls) {
+    if (!top.length) return '<p class="hint">No players</p>';
+    return `<ol class="board ${cls || ''}">${top.map(t => `
+      <li><span class="rk">${t.rank}</span><span>${esc(t.name)}</span>
+      <span class="gain">${state.phase === 'reveal' && t.lastPoints ? '+' + t.lastPoints : ''}</span><span>${t.score}</span></li>`).join('')}</ol>`;
+  }
+
+  function render() {
+    const s = state;
+    document.getElementById('title').textContent = s.title;
+    document.getElementById('qinfo').textContent = s.question ? `Question ${s.question.index + 1} / ${s.question.total}` : `${s.totalQuestions} questions`;
+    if (s.phase !== 'question') stopTimer();
+
+    if (s.phase === 'lobby') {
+      renderedKey = 'lobby';
+      app.innerHTML = `
+        <div class="join">
+          <div class="lbl">On your phone, go to</div>
+          ${joinUrls.map(u => `<div class="url">${esc(u)}</div>`).join('') || '<div class="url">…</div>'}
+        </div>
+        <div class="count">${s.playerCount} player${s.playerCount === 1 ? '' : 's'} joined</div>
+        <div class="names">${s.players.map(n => `<span>${esc(n)}</span>`).join('')}</div>
+        <button class="go" id="go" ${s.playerCount ? '' : 'disabled style="opacity:.5"'}>Start quiz ▶</button>
+        <p class="hint">Space / Enter = Start → Reveal now → Next</p>`;
+      document.getElementById('go').onclick = () => act('start');
+      return;
+    }
+
+    const q = s.question;
+
+    if (s.phase === 'question') {
+      const k = 'q' + q.index;
+      if (renderedKey !== k) {
+        renderedKey = k;
+        app.innerHTML = `
+          <div class="prompt">${esc(q.prompt)}</div>
+          <div class="row">
+            <div class="timer" id="timer"></div>
+            <div class="cards">${card(q, 'A')}${card(q, 'B')}</div>
+            <div class="answered">Answers<b id="ans"></b></div>
+          </div>
+          <button class="go" id="go">Reveal now</button>`;
+        document.getElementById('go').onclick = () => act('reveal');
+      }
+      document.getElementById('ans').textContent = `${s.answeredCount}/${s.playerCount}`;
+      const t = document.getElementById('timer');
+      const upd = () => { t.textContent = secondsLeft(); };
+      upd();
+      if (!tick) tick = setInterval(upd, 250);
+      return;
+    }
+
+    if (s.phase === 'reveal') {
+      renderedKey = 'r' + q.index;
+      const last = q.index + 1 >= q.total;
+      app.innerHTML = `
+        <div class="prompt">${esc(q.prompt)}</div>
+        <div class="reveal-grid">
+          <div>
+            <div class="cards">${card(q, 'A')}${card(q, 'B')}</div>
+            <div class="bars" style="margin-top:12px">
+              <span style="background:var(--a)">A: ${s.counts.A}</span>
+              <span style="background:var(--b)">B: ${s.counts.B}</span>
+              <span style="background:#555">No answer: ${s.counts.none}</span>
+            </div>
+          </div>
+          <div>
+            <h2>Leaderboard</h2>
+            ${board(s.top)}
+          </div>
+        </div>
+        ${q.explanation ? `<div class="explain">${esc(q.explanation)}</div>` : ''}
+        <button class="go" id="go">${last ? 'Final results 🏆' : 'Next question ▶'}</button>`;
+      document.getElementById('go').onclick = () => act('next');
+      return;
+    }
+
+    if (s.phase === 'final') {
+      renderedKey = 'final';
+      app.innerHTML = `
+        <h2 style="font-size:2.6rem">🏆 Final results</h2>
+        <div style="max-width:800px;width:100%;margin:0 auto">${board(s.top, 'final')}</div>
+        <button class="go" id="go">Play again (reset scores)</button>`;
+      document.getElementById('go').onclick = () => { if (confirm('Reset scores and return to the lobby?')) act('reset'); };
+    }
+  }
+})();
+</script>
+</body>
+</html>

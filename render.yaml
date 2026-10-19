@@ -1,7 +1,11 @@
 services:
   - type: web
-    name: med-flashcards
-    env: node
+    name: inflation-quiz
+    runtime: node
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: HOST_KEY
+        sync: false

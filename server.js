@@ -1,246 +1,363 @@
-const express = require("express");
-const crypto = require("crypto");
-const path = require("path");
-const { load, save } = require("./lib/store");
-const { freshSrsState, applyReview, isDue } = require("./lib/srs");
-const { seedDemoDataIfEmpty } = require("./lib/seed");
+// Inflation Quiz — a Kahoot-style live quiz server with zero npm dependencies.
+// Students: GET /            Host/projector: GET /host?key=<HOST_KEY>
+'use strict';
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const crypto = require('crypto');
 
-seedDemoDataIfEmpty();
+const PORT = Number(process.env.PORT) || 3000;
+const HOST_KEY = process.env.HOST_KEY || crypto.randomBytes(3).toString('hex');
+const ROOT = __dirname;
+const MAX_PLAYERS = 200;
+const ANSWER_GRACE_MS = 1000;   // late answers still count (network latency)
+const ALL_ANSWERED_DELAY = 600; // reveal shortly after everyone has answered
+const BROADCAST_DEBOUNCE = 120;
+const KEEPALIVE_MS = 20000;
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.static(path.join(__dirname, "public")));
+const quiz = JSON.parse(fs.readFileSync(path.join(ROOT, 'questions.json'), 'utf8'));
+const questions = quiz.questions;
 
-function deckSummary(deck, cards) {
-  const deckCards = cards.filter((c) => c.deckId === deck.id);
-  const dueCount = deckCards.filter((c) => isDue(c.srs)).length;
-  return {
-    ...deck,
-    cardCount: deckCards.length,
-    dueCount,
-  };
+// ---- game state (in memory) ----------------------------------------------
+
+const players = new Map(); // pid -> {pid, name, score, lastPoints}
+const clients = new Set(); // {res, pid|null, host:bool}
+let phase = 'lobby';       // lobby | question | reveal | final
+let qIndex = -1;
+let startedAt = 0;
+let endsAt = 0;
+let answers = new Map();   // pid -> {choice, points, at}
+let revealTimer = null;
+
+function imgUrl(file) {
+  if (!file) return null;
+  return fs.existsSync(path.join(ROOT, 'img', file)) ? '/img/' + file : null;
 }
 
-// ---- Decks ----
-
-app.get("/api/decks", (req, res) => {
-  const { decks, cards } = load();
-  res.json(decks.map((d) => deckSummary(d, cards)));
-});
-
-app.post("/api/decks", (req, res) => {
-  const { name, description } = req.body;
-  if (!name || !name.trim()) {
-    return res.status(400).json({ error: "Deck name is required." });
-  }
-  const data = load();
-  const deck = {
-    id: crypto.randomUUID(),
-    name: name.trim(),
-    description: (description || "").trim(),
-    createdAt: new Date().toISOString(),
+function publicQuestion(i, withAnswer) {
+  const q = questions[i];
+  const out = {
+    index: i,
+    total: questions.length,
+    id: q.id,
+    prompt: q.prompt,
+    seconds: q.seconds,
+    options: {
+      A: { year: q.a.year, img: imgUrl(q.a.img), file: q.a.img },
+      B: { year: q.b.year, img: imgUrl(q.b.img), file: q.b.img },
+    },
   };
-  data.decks.push(deck);
-  save(data);
-  res.status(201).json(deckSummary(deck, data.cards));
-});
-
-app.get("/api/decks/:id", (req, res) => {
-  const { decks, cards } = load();
-  const deck = decks.find((d) => d.id === req.params.id);
-  if (!deck) return res.status(404).json({ error: "Deck not found." });
-  const deckCards = cards.filter((c) => c.deckId === deck.id);
-  res.json({ ...deck, cards: deckCards });
-});
-
-app.put("/api/decks/:id", (req, res) => {
-  const data = load();
-  const deck = data.decks.find((d) => d.id === req.params.id);
-  if (!deck) return res.status(404).json({ error: "Deck not found." });
-  const { name, description } = req.body;
-  if (name !== undefined) deck.name = name.trim();
-  if (description !== undefined) deck.description = description.trim();
-  save(data);
-  res.json(deckSummary(deck, data.cards));
-});
-
-app.delete("/api/decks/:id", (req, res) => {
-  const data = load();
-  const exists = data.decks.some((d) => d.id === req.params.id);
-  if (!exists) return res.status(404).json({ error: "Deck not found." });
-  data.decks = data.decks.filter((d) => d.id !== req.params.id);
-  data.cards = data.cards.filter((c) => c.deckId !== req.params.id);
-  save(data);
-  res.status(204).end();
-});
-
-// ---- Cards ----
-
-app.post("/api/decks/:id/cards", (req, res) => {
-  const data = load();
-  const deck = data.decks.find((d) => d.id === req.params.id);
-  if (!deck) return res.status(404).json({ error: "Deck not found." });
-
-  const { front, back, explanation, tags, distractors } = req.body;
-  if (!front || !front.trim() || !back || !back.trim()) {
-    return res.status(400).json({ error: "Both front and back are required." });
+  if (withAnswer) {
+    out.correct = q.correct;
+    out.explanation = q.explanation || '';
   }
-
-  const card = {
-    id: crypto.randomUUID(),
-    deckId: deck.id,
-    front: front.trim(),
-    back: back.trim(),
-    explanation: (explanation || "").trim(),
-    tags: Array.isArray(tags) ? tags : [],
-    distractors: Array.isArray(distractors) ? distractors : [],
-    srs: freshSrsState(),
-  };
-  data.cards.push(card);
-  save(data);
-  res.status(201).json(card);
-});
-
-app.put("/api/cards/:id", (req, res) => {
-  const data = load();
-  const card = data.cards.find((c) => c.id === req.params.id);
-  if (!card) return res.status(404).json({ error: "Card not found." });
-
-  const { front, back, explanation, tags, distractors } = req.body;
-  if (front !== undefined) card.front = front.trim();
-  if (back !== undefined) card.back = back.trim();
-  if (explanation !== undefined) card.explanation = explanation.trim();
-  if (tags !== undefined) card.tags = Array.isArray(tags) ? tags : [];
-  if (distractors !== undefined)
-    card.distractors = Array.isArray(distractors) ? distractors : [];
-
-  save(data);
-  res.json(card);
-});
-
-app.delete("/api/cards/:id", (req, res) => {
-  const data = load();
-  const exists = data.cards.some((c) => c.id === req.params.id);
-  if (!exists) return res.status(404).json({ error: "Card not found." });
-  data.cards = data.cards.filter((c) => c.id !== req.params.id);
-  save(data);
-  res.status(204).end();
-});
-
-// ---- Study (spaced repetition) ----
-
-app.get("/api/decks/:id/study", (req, res) => {
-  const { decks, cards } = load();
-  const deck = decks.find((d) => d.id === req.params.id);
-  if (!deck) return res.status(404).json({ error: "Deck not found." });
-  const due = shuffle(cards.filter((c) => c.deckId === deck.id && isDue(c.srs)));
-  res.json(due);
-});
-
-app.post("/api/cards/:id/review", (req, res) => {
-  const { rating } = req.body;
-  if (!["again", "hard", "good", "easy"].includes(rating)) {
-    return res.status(400).json({ error: "rating must be one of: again, hard, good, easy" });
-  }
-  const data = load();
-  const card = data.cards.find((c) => c.id === req.params.id);
-  if (!card) return res.status(404).json({ error: "Card not found." });
-
-  card.srs = applyReview(card.srs, rating);
-  save(data);
-  res.json(card);
-});
-
-// ---- Quiz (multiple choice) ----
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+  return out;
 }
 
-app.get("/api/decks/:id/quiz", (req, res) => {
-  const { decks, cards } = load();
-  const deck = decks.find((d) => d.id === req.params.id);
-  if (!deck) return res.status(404).json({ error: "Deck not found." });
+function ranking() {
+  const list = [...players.values()].sort(
+    (x, y) => y.score - x.score || x.name.localeCompare(y.name));
+  let rank = 0;
+  let prev = null;
+  return list.map((p, i) => {
+    if (p.score !== prev) { rank = i + 1; prev = p.score; }
+    return { pid: p.pid, name: p.name, score: p.score, lastPoints: p.lastPoints, rank };
+  });
+}
 
-  const deckCards = cards.filter((c) => c.deckId === deck.id);
-  if (deckCards.length < 2) {
-    return res
-      .status(400)
-      .json({ error: "Need at least 2 cards in the deck to build a multiple-choice quiz." });
+function counts() {
+  const c = { A: 0, B: 0, none: 0 };
+  for (const a of answers.values()) c[a.choice]++;
+  c.none = Math.max(0, players.size - c.A - c.B);
+  return c;
+}
+
+function snapshot(client) {
+  const showAnswer = phase === 'reveal' || phase === 'final';
+  const ranked = ranking();
+  const s = {
+    type: 'state',
+    now: Date.now(),
+    title: quiz.title,
+    phase,
+    playerCount: players.size,
+    answeredCount: answers.size,
+    endsAt,
+    startedAt,
+  };
+  if (qIndex >= 0 && phase !== 'lobby') s.question = publicQuestion(qIndex, showAnswer);
+  if (showAnswer) {
+    s.counts = counts();
+    s.top = ranked.slice(0, phase === 'final' ? 10 : 5)
+      .map(({ name, score, rank, lastPoints }) => ({ name, score, rank, lastPoints }));
   }
-
-  const questions = shuffle(deckCards).map((card) => {
-    let distractors = card.distractors && card.distractors.length ? card.distractors : [];
-    if (distractors.length < 3) {
-      const pool = shuffle(
-        deckCards.filter((c) => c.id !== card.id).map((c) => c.back)
-      );
-      for (const candidate of pool) {
-        if (distractors.length >= 3) break;
-        if (!distractors.includes(candidate) && candidate !== card.back) {
-          distractors.push(candidate);
-        }
+  if (client.host) {
+    s.players = ranked.map(r => r.name);
+    s.totalQuestions = questions.length;
+  } else {
+    const me = ranked.find(r => r.pid === client.pid);
+    if (me) {
+      const a = answers.get(me.pid);
+      s.you = {
+        name: me.name,
+        score: me.score,
+        rank: me.rank,
+        of: ranked.length,
+        answered: !!a,
+        choice: a ? a.choice : null,
+      };
+      if (showAnswer && phase === 'reveal') {
+        s.you.lastPoints = a ? a.points : 0;
+        s.you.correct = !!a && a.choice === questions[qIndex].correct;
       }
     }
-    distractors = distractors.slice(0, 3);
-
-    const options = shuffle([card.back, ...distractors]);
-    return {
-      cardId: card.id,
-      question: card.front,
-      options,
-      correctAnswer: card.back,
-      explanation: card.explanation || "",
-    };
-  });
-
-  res.json(questions);
-});
-
-// ---- Import (AI-generated flashcards) ----
-
-app.post("/api/decks/:id/import", (req, res) => {
-  const data = load();
-  const deck = data.decks.find((d) => d.id === req.params.id);
-  if (!deck) return res.status(404).json({ error: "Deck not found." });
-
-  const { cards } = req.body;
-  if (!Array.isArray(cards)) {
-    return res.status(400).json({ error: "Body must be { cards: [...] }." });
   }
+  return s;
+}
 
-  const imported = [];
-  const errors = [];
-  cards.forEach((c, i) => {
-    if (!c || !c.front || !c.front.trim() || !c.back || !c.back.trim()) {
-      errors.push(`Card at index ${i} is missing a front or back.`);
-      return;
+function send(client, obj) {
+  try { client.res.write('data: ' + JSON.stringify(obj) + '\n\n'); } catch (_) { /* closed */ }
+}
+
+let broadcastTimer = null;
+function broadcast() {
+  if (broadcastTimer) return;
+  broadcastTimer = setTimeout(() => {
+    broadcastTimer = null;
+    for (const c of clients) {
+      if (!c.host && c.pid && !players.has(c.pid)) send(c, { type: 'unknown' });
+      else send(c, snapshot(c));
     }
-    const card = {
-      id: crypto.randomUUID(),
-      deckId: deck.id,
-      front: String(c.front).trim(),
-      back: String(c.back).trim(),
-      explanation: c.explanation ? String(c.explanation).trim() : "",
-      tags: Array.isArray(c.tags) ? c.tags : [],
-      distractors: Array.isArray(c.distractors) ? c.distractors : [],
-      srs: freshSrsState(),
-    };
-    data.cards.push(card);
-    imported.push(card);
-  });
+  }, BROADCAST_DEBOUNCE);
+}
 
-  save(data);
-  res.status(201).json({ imported: imported.length, errors });
+setInterval(() => {
+  for (const c of clients) { try { c.res.write(': ping\n\n'); } catch (_) {} }
+}, KEEPALIVE_MS).unref();
+
+// ---- game flow --------------------------------------------------------------
+
+function clearRevealTimer() {
+  if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+}
+
+function startQuestion(i) {
+  clearRevealTimer();
+  qIndex = i;
+  phase = 'question';
+  answers = new Map();
+  for (const p of players.values()) p.lastPoints = 0;
+  startedAt = Date.now();
+  endsAt = startedAt + questions[i].seconds * 1000;
+  revealTimer = setTimeout(reveal, endsAt - startedAt + ANSWER_GRACE_MS);
+  broadcast();
+}
+
+function reveal() {
+  if (phase !== 'question') return;
+  clearRevealTimer();
+  phase = 'reveal';
+  broadcast();
+}
+
+function next() {
+  if (phase !== 'reveal') return;
+  if (qIndex + 1 < questions.length) startQuestion(qIndex + 1);
+  else { phase = 'final'; broadcast(); }
+}
+
+function reset(clearPlayers) {
+  clearRevealTimer();
+  phase = 'lobby';
+  qIndex = -1;
+  startedAt = endsAt = 0;
+  answers = new Map();
+  if (clearPlayers) players.clear();
+  for (const p of players.values()) { p.score = 0; p.lastPoints = 0; }
+  broadcast();
+}
+
+function answer(pid, choice) {
+  const p = players.get(pid);
+  if (!p) return [404, { error: 'unknown player' }];
+  if (choice !== 'A' && choice !== 'B') return [400, { error: 'bad choice' }];
+  const now = Date.now();
+  if (phase !== 'question' || now > endsAt + ANSWER_GRACE_MS) return [409, { error: 'not accepting answers' }];
+  if (answers.has(pid)) return [200, { ok: true, ignored: true }];
+  const q = questions[qIndex];
+  const limit = q.seconds * 1000;
+  const elapsed = Math.min(Math.max(now - startedAt, 0), limit);
+  const points = choice === q.correct ? Math.round(1000 * (1 - 0.5 * elapsed / limit)) : 0;
+  answers.set(pid, { choice, points, at: now });
+  p.score += points;
+  p.lastPoints = points;
+  if (answers.size >= players.size) {
+    clearRevealTimer();
+    revealTimer = setTimeout(reveal, ALL_ANSWERED_DELAY);
+  }
+  broadcast();
+  return [200, { ok: true }];
+}
+
+function cleanName(raw) {
+  return String(raw || '')
+    .replace(/[\u0000-\u001f\u007f<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 16)
+    .trim();
+}
+
+function join(rawName) {
+  const name = cleanName(rawName);
+  if (!name) return [400, { error: 'Please enter a name' }];
+  const lower = name.toLowerCase();
+  for (const p of players.values()) {
+    if (p.name.toLowerCase() === lower) return [409, { error: 'That name is taken — try another' }];
+  }
+  if (players.size >= MAX_PLAYERS) return [503, { error: 'Game is full' }];
+  const pid = crypto.randomBytes(9).toString('base64url');
+  players.set(pid, { pid, name, score: 0, lastPoints: 0 });
+  broadcast();
+  return [200, { pid, name }];
+}
+
+function hostAction(action) {
+  switch (action) {
+    case 'start': if (phase === 'lobby' && questions.length) startQuestion(0); break;
+    case 'reveal': reveal(); break;
+    case 'next': next(); break;
+    case 'reset': reset(false); break;
+    case 'clear': reset(true); break;
+    default: return [400, { error: 'bad action' }];
+  }
+  return [200, { ok: true, phase }];
+}
+
+// ---- http -------------------------------------------------------------------
+
+function isHost(key) {
+  if (typeof key !== 'string') return false;
+  const a = Buffer.from(key);
+  const b = Buffer.from(HOST_KEY);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function json(res, status, obj) {
+  res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(obj));
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', (chunk) => {
+      data += chunk;
+      if (data.length > 10000) { data = ''; req.destroy(); }
+    });
+    req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch (_) { resolve({}); } });
+    req.on('error', () => resolve({}));
+  });
+}
+
+const TYPES = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png' };
+
+function serveFile(res, file, cache) {
+  fs.readFile(file, (err, buf) => {
+    if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); return res.end('Not found'); }
+    res.writeHead(200, {
+      'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
+      'Cache-Control': cache ? 'public, max-age=300' : 'no-store',
+    });
+    res.end(buf);
+  });
+}
+
+function lanAddresses() {
+  const out = [];
+  for (const list of Object.values(os.networkInterfaces())) {
+    for (const i of list || []) if (i.family === 'IPv4' && !i.internal) out.push(i.address);
+  }
+  return out;
+}
+
+function openEvents(req, res, url) {
+  const host = isHost(url.searchParams.get('key'));
+  const pid = url.searchParams.get('pid');
+  if (!host && !pid) return json(res, 403, { error: 'forbidden' });
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-store',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.write('retry: 2000\n\n');
+  const client = { res, pid: host ? null : pid, host };
+  clients.add(client);
+  if (!host && !players.has(pid)) send(client, { type: 'unknown' });
+  else send(client, snapshot(client));
+  req.on('close', () => clients.delete(client));
+}
+
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url, 'http://x');
+  const p = url.pathname;
+  try {
+    if (req.method === 'GET') {
+      if (p === '/' || p === '/play') return serveFile(res, path.join(ROOT, 'public', 'play.html'));
+      if (p === '/host') {
+        if (!isHost(url.searchParams.get('key'))) {
+          res.writeHead(403, { 'Content-Type': 'text/plain' });
+          return res.end('Forbidden: open /host?key=<HOST_KEY>');
+        }
+        return serveFile(res, path.join(ROOT, 'public', 'host.html'));
+      }
+      if (/^\/img\/[a-z0-9_.-]+\.(jpe?g|png)$/i.test(p) && !p.includes('..')) {
+        return serveFile(res, path.join(ROOT, p), true);
+      }
+      if (p === '/api/events') return openEvents(req, res, url);
+      if (p === '/api/info') {
+        if (!isHost(url.searchParams.get('key'))) return json(res, 403, { error: 'forbidden' });
+        return json(res, 200, { addresses: lanAddresses(), port: PORT });
+      }
+      if (p === '/healthz') return json(res, 200, { ok: true });
+    } else if (req.method === 'POST') {
+      if (p === '/api/join') {
+        const body = await readBody(req);
+        const [s, o] = join(body.name);
+        return json(res, s, o);
+      }
+      if (p === '/api/answer') {
+        const body = await readBody(req);
+        const [s, o] = answer(String(body.pid || ''), body.choice);
+        return json(res, s, o);
+      }
+      if (p === '/api/host') {
+        const body = await readBody(req);
+        if (!isHost(body.key)) return json(res, 403, { error: 'forbidden' });
+        const [s, o] = hostAction(body.action);
+        return json(res, s, o);
+      }
+    }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+  } catch (err) {
+    console.error(err);
+    if (!res.headersSent) json(res, 500, { error: 'server error' });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(`Flashcards app running at http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  const missing = [];
+  for (const q of questions) for (const o of [q.a, q.b]) if (!imgUrl(o.img)) missing.push(o.img);
+  console.log(`\n${quiz.title} — ${questions.length} questions\n`);
+  console.log('HOST (open this on the projector computer):');
+  console.log(`  http://localhost:${PORT}/host?key=${HOST_KEY}`);
+  console.log('STUDENTS (type this into their phones):');
+  const addrs = lanAddresses();
+  for (const a of addrs.length ? addrs : ['localhost']) console.log(`  http://${a}:${PORT}`);
+  if (missing.length) console.log(`\nMissing card images in img/: ${missing.join(', ')}`);
+  console.log('');
 });

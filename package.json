@@ -1,13 +1,14 @@
 {
-  "name": "med-flashcards",
+  "name": "inflation-quiz",
   "version": "1.0.0",
-  "description": "Local flashcards and quiz app for medical school study, with spaced repetition and AI-assisted card import.",
-  "private": true,
+  "description": "Kahoot-style live inflation quiz for a classroom (no dependencies)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "loadtest": "node scripts/loadtest.js"
   },
-  "dependencies": {
-    "express": "^4.19.2"
-  }
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
 }
