@@ -87,6 +87,14 @@ async function waitFor(fn, ms = 15000) {
   await Promise.all(players.map((p) => p.conn.ready));
   check(players.length === N, `${N} players joined and connected in ${Date.now() - t0} ms`);
   check((await post('/api/join', { name: 'student1' })).status === 409, 'duplicate name (case-insensitive) -> 409');
+  check((await post('/api/join', { name: 'Big D1ck' })).status === 400, 'blocked name -> 400');
+  check((await fetch(base + '/blocked-names.txt')).status === 404, 'blocklist is not downloadable');
+  const extra = await post('/api/join', { name: 'Kickme' });
+  const extraConn = listen('pid=' + extra.data.pid);
+  await extraConn.ready;
+  check((await post('/api/host', { key, action: 'kick', name: 'kickme' })).status === 200, 'host can kick a player');
+  check(await waitFor(() => extraConn.seen.some((m) => m.type === 'unknown')), 'kicked player is sent back to join');
+  extraConn.ctrl.abort();
   check(await waitFor(() => hostConn.last && hostConn.last.playerCount === N), 'host sees all players');
 
   await host('start');

@@ -36,7 +36,8 @@ Recommended path: deploy this app to Render's free tier and use the https link i
 - `GET /api/events?pid=` (student) or `?key=` (host) is a Server-Sent Events stream. The server pushes a full personalized snapshot on every change (debounced 120 ms, keepalive every 20 s). An unknown pid gets `{type:"unknown"}`, and the phone goes back to the join screen.
 - `POST /api/join {name}` → `{pid,name}`. Names are at most 16 characters, unique case-insensitively (409 on a duplicate), with control characters and `<>` stripped. The game is capped at 200 players.
 - `POST /api/answer {pid,choice}`: the first answer counts and later ones are ignored. Answers are accepted until `endsAt` + 1 s grace.
-- `POST /api/host {key,action}`, where `action` is `start | reveal | next | reset | clear`.
+- `POST /api/host {key,action}`, where `action` is `start | reveal | next | reset | clear | kick` (`kick` also takes `name`).
+- Names are checked against `blocked-names.txt` plus the `BLOCKED_NAMES` env var, server side only.
 - Phases: `lobby → question → reveal → … → final`. The `correct` answer is never sent during the question phase.
 - Scoring: `round(1000 × (1 − 0.5 × elapsed/limit))` for a correct answer, otherwise 0.
 - The answer is revealed automatically 1 s after the timer ends (the answer grace period), or 600 ms after everyone has answered.
@@ -44,11 +45,10 @@ Recommended path: deploy this app to Render's free tier and use the https link i
 
 ## Open items
 
-1. **Fill in the explanations** in `questions.json` (Survivor, TV, LA house, Ford). Read them off the cards or the MRU interactive; don't guess. Jordans and Big Mac are done.
-2. **Deploy to Render.** The teacher creates the account and sets `HOST_KEY`. Then run `node scripts/loadtest.js https://<app>.onrender.com <key> 40` (before class, since it clears the game).
-3. **Test on a real phone** over cellular and over wifi, including a reload mid-question.
-4. Optional: persist state to disk, rate-limit `/api/join`, add a "kick player" button.
-5. Open the Render link about 5 minutes before class to wake the free instance.
+1. **Deploy to Render.** The teacher creates the account and sets `HOST_KEY`. Then run `node scripts/loadtest.js https://<app>.onrender.com <key> 40` (before class, since it clears the game).
+2. **Test on a real phone** over cellular and over wifi, including a reload mid-question.
+3. Optional: persist state to disk, rate-limit `/api/join`.
+4. Open the Render link about 5 minutes before class to wake the free instance.
 
 ## Constraints
 

@@ -27,8 +27,19 @@ JPEG or PNG both work (change the file name in `questions.json` if you use `.png
 360–600 px wide is plenty. If an image is missing, the card shows only the year, and the host
 screen and the startup log name the missing file.
 
-Explanation text shown after each answer is in `questions.json` → `explanation`. Only the
-Air Jordans and Big Mac ones are filled in. Copy the others from the MRU interactive.
+Each question's `explanation` in `questions.json` appears on the reveal/leaderboard slide.
+Each one shows the inflation calculation using the price and CPI on the cards.
+
+## Blocked names
+
+`blocked-names.txt` lists names students can't use: swearing, sexual terms, slurs and classic
+prank names like "Ben Dover". The server reads it and never sends it to phones, so a student
+just sees "Please choose a different name".
+
+- A plain line, such as `fuck`, blocks the word anywhere in a name, including `xXfuckXx`, `F.U.C.K`, `fuuuck` and `fvck`-style number swaps like `sh1t`.
+- A line starting with `=`, such as `=dick`, blocks it only as a separate word. "Dick" and "Big Dick" are blocked, but "Dickens" is allowed.
+- The repo is public on GitHub, so anyone who looks at the repo can read this file. To keep extra entries private, put them in a `BLOCKED_NAMES` environment variable on Render, comma-separated (e.g. `badword1,=badword2`).
+- If something slips through, **click the name** on the projector (in the lobby or on the leaderboard) to remove that player. They return to the join screen.
 
 ## Run locally
 
@@ -61,7 +72,8 @@ loses players and scores.
 - **Question:** a 60-second timer runs. The answer is revealed when time runs out or when everyone has answered, or press **Reveal now**.
 - **Reveal:** the correct card, A/B counts, the explanation and the top 5. Each phone shows that student's rank. Press **Next**.
 - **Final:** the top 10.
-- Keyboard: **Space / Enter** = Start → Reveal now → Next.
+- **Full screen:** the **⛶ Full screen** button (top right) or the **F** key. Press F or Esc to leave.
+- Keyboard: **Space / Enter** = Start → Reveal now → Next, **F** = full screen, **M** = music on/off.
 - **Reset scores** goes back to the lobby and keeps players. **Clear players** removes everyone.
 - If a student reloads the page, they stay in the game (their ID is saved in `localStorage`).
 
@@ -100,6 +112,7 @@ that server**, so don't run it during class.
 
 ```
 server.js          HTTP server, Server-Sent Events, game state (no dependencies)
+blocked-names.txt  names students may not use (server only)
 questions.json     title + questions (prompt, years, image names, correct answer, explanation)
 public/play.html   student phone page
 public/host.html   projector page
