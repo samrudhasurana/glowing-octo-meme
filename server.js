@@ -28,6 +28,52 @@ try {
     .map(f => f.replace(/\.mp3$/, ''));
 } catch (_) { /* no audio folder */ }
 
+// ---- name filter -------------------------------------------------------------
+// blocked-names.txt is read on the server only and never sent to browsers.
+// A plain entry is blocked anywhere in a name; "=entry" only as a whole word
+// (so "=dick" blocks "Dick" but not "Dickens"). Extra entries can also come
+// from the BLOCKED_NAMES env var (comma-separated), which keeps them off GitHub.
+
+const LEET = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', 8: 'b', '@': 'a', $: 's', '!': 'i', '|': 'i', '+': 't' };
+function normalize(s) {
+  return s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[0134578@$!|+]/g, c => LEET[c]);
+}
+// "F.u.u.c k" -> compact "fuuck" -> squashed "fuck". Squashing only applies to entries
+// without double letters, so "boob" can't match "Bob".
+const compact = s => s.replace(/[^a-z]/g, '');
+const squash = s => s.replace(/(.)\1+/g, '$1');
+
+const blocked = { anywhere: [], word: [] };
+(function loadBlocklist() {
+  let lines = [];
+  try { lines = fs.readFileSync(path.join(ROOT, 'blocked-names.txt'), 'utf8').split('\n'); } catch (_) {}
+  lines = lines.concat((process.env.BLOCKED_NAMES || '').split(','));
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || line.startsWith('#')) continue;
+    const whole = line.startsWith('=');
+    const raw = compact(normalize(whole ? line.slice(1) : line));
+    if (!raw) continue;
+    const entry = { raw, sq: squash(raw) === raw ? raw : null };
+    // very short entries would match inside too many real names, so treat them as whole words
+    (whole || raw.length < 4 ? blocked.word : blocked.anywhere).push(entry);
+  }
+})();
+
+const hits = (text, e, partial) => {
+  const sq = squash(text);
+  return partial ? text.includes(e.raw) || (e.sq && sq.includes(e.sq)) : text === e.raw || (e.sq && sq === e.sq);
+};
+
+function isBlockedName(name) {
+  const n = normalize(name);
+  const all = compact(n);
+  const words = n.split(/[^a-z]+/).filter(Boolean).concat(all);
+  return blocked.anywhere.some(e => hits(all, e, true)) ||
+    blocked.word.some(e => words.some(w => hits(w, e, false)));
+}
+
 // ---- game state (in memory) ----------------------------------------------
 
 const players = new Map(); // pid -> {pid, name, score, lastPoints}
@@ -222,6 +268,7 @@ function cleanName(raw) {
 function join(rawName) {
   const name = cleanName(rawName);
   if (!name) return [400, { error: 'Please enter a name' }];
+  if (isBlockedName(name)) return [400, { error: 'Please choose a different name — use your real first name.' }];
   const lower = name.toLowerCase();
   for (const p of players.values()) {
     if (p.name.toLowerCase() === lower) return [409, { error: 'That name is taken — try another' }];
@@ -233,8 +280,26 @@ function join(rawName) {
   return [200, { pid, name }];
 }
 
-function hostAction(action) {
+function kick(name) {
+  const lower = String(name || '').toLowerCase();
+  for (const p of players.values()) {
+    if (p.name.toLowerCase() !== lower) continue;
+    players.delete(p.pid);
+    answers.delete(p.pid);
+    // everyone left may have answered already
+    if (phase === 'question' && players.size && answers.size >= players.size) {
+      clearRevealTimer();
+      revealTimer = setTimeout(reveal, ALL_ANSWERED_DELAY);
+    }
+    broadcast();
+    return true;
+  }
+  return false;
+}
+
+function hostAction(action, body) {
   switch (action) {
+    case 'kick': if (!kick(body.name)) return [404, { error: 'no such player' }]; break;
     case 'start': if (phase === 'lobby' && questions.length) startQuestion(0); break;
     case 'reveal': reveal(); break;
     case 'next': next(); break;
@@ -365,7 +430,7 @@ const server = http.createServer(async (req, res) => {
       if (p === '/api/host') {
         const body = await readBody(req);
         if (!isHost(body.key)) return json(res, 403, { error: 'forbidden' });
-        const [s, o] = hostAction(body.action);
+        const [s, o] = hostAction(body.action, body);
         return json(res, s, o);
       }
     }

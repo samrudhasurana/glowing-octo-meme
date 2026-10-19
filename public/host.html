@@ -36,7 +36,20 @@
   .tag.A { background:var(--a); } .tag.B { background:var(--b); }
   .card.right { border-color:var(--ok); box-shadow:0 0 30px rgba(38,137,12,.7); }
   .card.dim { opacity:.4; }
-  .explain { text-align:center; font-size:1.4rem; background:var(--panel); border-radius:12px; padding:14px 20px; }
+  .explain { font-size:clamp(1.1rem, 1.7vw, 1.6rem); line-height:1.4; background:#fff; color:#222; border-left:10px solid var(--ok); border-radius:12px; padding:14px 20px; margin-bottom:16px; }
+  .explain .why { font-weight:900; color:var(--ok); display:block; margin-bottom:4px; }
+  .reveal-grid .card img { max-height:40vh; }
+  @media (max-height: 820px) {
+    main { padding:12px 24px; gap:10px; }
+    .prompt { font-size:clamp(1.3rem, 2.4vw, 1.9rem); padding:8px 16px; }
+    .reveal-grid .card img { max-height:33vh; }
+    .explain { padding:10px 16px; margin-bottom:8px; }
+    h2 { font-size:1.4rem; }
+    ol.board li { padding:6px 14px; margin:5px 0; font-size:1.15rem; }
+    .go { padding:10px 30px; font-size:1.2rem; }
+  }
+  .kickable { cursor:pointer; }
+  .kickable:hover { outline:2px dashed #ff8a8a; }
   .reveal-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:28px; align-items:start; }
   h2 { margin:.2em 0; text-align:center; font-size:1.8rem; }
   ol.board { list-style:none; padding:0; margin:0; }
@@ -57,6 +70,7 @@
   <span class="title" id="title">Inflation Quiz</span>
   <span class="tools">
     <span id="qinfo" class="hint"></span>
+    <button id="btnFull" title="Full screen (F)">⛶ Full screen</button>
     <button id="btnSound" class="locked" title="Music on/off (M)">🔈 Click to enable sound</button>
     <button id="btnReset" title="Back to lobby, keep players, zero scores">Reset scores</button>
     <button id="btnClear" title="Remove all players">Clear players</button>
@@ -280,18 +294,40 @@
     }).catch(() => {});
   }
 
-  async function act(action) {
+  async function act(action, extra) {
     try {
-      await fetch('/api/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, action }) });
+      await fetch('/api/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, action, ...extra }) });
     } catch (_) { alert('Network problem — try again.'); }
   }
 
   document.getElementById('btnReset').onclick = () => { if (confirm('Go back to the lobby and set every score to 0? Players stay joined.')) act('reset'); };
   document.getElementById('btnClear').onclick = () => { if (confirm('Remove ALL players? They will need to join again.')) act('clear'); };
 
+  // Click a name (lobby or leaderboard) to remove that player.
+  app.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-kick]');
+    if (!el) return;
+    const name = el.dataset.kick;
+    if (confirm(`Remove "${name}" from the game? They can rejoin with a different name.`)) act('kick', { name });
+  });
+
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  function toggleFullscreen() {
+    const d = document.documentElement;
+    if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else (d.requestFullscreen || d.webkitRequestFullscreen).call(d);
+  }
+  function updateFullButton() {
+    document.getElementById('btnFull').textContent = fsEl() ? '⛶ Exit full screen' : '⛶ Full screen';
+  }
+  document.getElementById('btnFull').onclick = toggleFullscreen;
+  document.addEventListener('fullscreenchange', updateFullButton);
+  document.addEventListener('webkitfullscreenchange', updateFullButton);
+
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || !state) return;
     if (e.key === 'm' || e.key === 'M') { Music.toggle(); return; }
+    if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); return; }
     if (e.key !== ' ' && e.key !== 'Enter') return;
     e.preventDefault();
     if (state.phase === 'lobby') act('start');
@@ -325,7 +361,7 @@
   function board(top, cls) {
     if (!top.length) return '<p class="hint">No players</p>';
     return `<ol class="board ${cls || ''}">${top.map(t => `
-      <li><span class="rk">${t.rank}</span><span>${esc(t.name)}</span>
+      <li class="kickable" data-kick="${esc(t.name)}" title="Click to remove"><span class="rk">${t.rank}</span><span>${esc(t.name)}</span>
       <span class="gain">${state.phase === 'reveal' && t.lastPoints ? '+' + t.lastPoints : ''}</span><span>${t.score}</span></li>`).join('')}</ol>`;
   }
 
@@ -346,9 +382,9 @@
           ${joinUrls.map(u => `<div class="url">${esc(u)}</div>`).join('') || '<div class="url">…</div>'}
         </div>
         <div class="count">${s.playerCount} player${s.playerCount === 1 ? '' : 's'} joined</div>
-        <div class="names">${s.players.map(n => `<span>${esc(n)}</span>`).join('')}</div>
+        <div class="names">${s.players.map(n => `<span class="kickable" data-kick="${esc(n)}" title="Click to remove">${esc(n)}</span>`).join('')}</div>
         <button class="go" id="go" ${s.playerCount ? '' : 'disabled style="opacity:.5"'}>Start quiz ▶</button>
-        <p class="hint">Space / Enter = Start → Reveal now → Next · M = music on/off</p>`;
+        <p class="hint">Space / Enter = Start → Reveal now → Next · F = full screen · M = music on/off · click a name to remove it</p>`;
       document.getElementById('go').onclick = () => act('start');
       return;
     }
@@ -397,11 +433,11 @@
             </div>
           </div>
           <div>
+            <div class="explain"><span class="why">✅ Answer: ${q.correct} — here's why</span>${esc(q.explanation || 'Adjust the older price to today’s dollars: old price × (new CPI ÷ old CPI), then compare.')}</div>
             <h2>Leaderboard</h2>
             ${board(s.top)}
           </div>
         </div>
-        ${q.explanation ? `<div class="explain">${esc(q.explanation)}</div>` : ''}
         <button class="go" id="go">${last ? 'Final results 🏆' : 'Next question ▶'}</button>`;
       document.getElementById('go').onclick = () => act('next');
       return;

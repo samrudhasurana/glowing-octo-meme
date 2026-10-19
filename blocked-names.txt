@@ -1,0 +1,147 @@
+# Names students are NOT allowed to use. Read by the server only; never sent to phones.
+#
+#   word     blocked anywhere in the name (e.g. "fuck" also blocks "xXfuckXx", "F.U.C.K" and "fuuuck")
+#   =word    blocked only as a separate word, for words that hide inside real names
+#            (e.g. "=dick" blocks "Dick" or "Big Dick" but still allows "Dickens")
+#
+# Matching ignores case, spaces, punctuation and common number swaps (0=o, 1=i, 3=e, 4=a, 5=s, @=a, $=s).
+# Stretched letters ("fuuuck") are caught for entries that have no double letters themselves.
+# Entries shorter than 4 letters always count as whole words.
+# A student who picks a blocked name just sees "Please choose a different name".
+# Add a line, commit, and Render redeploys. Lines starting with # are ignored.
+# Want entries that don't appear on GitHub? Put them in the BLOCKED_NAMES environment variable on Render (comma-separated).
+
+# --- swearing ---
+fuck
+fuk
+fck
+motherf
+shithead
+shitty
+bullshit
+=shit
+=shits
+bitch
+biatch
+bastard
+asshole
+arsehole
+dumbass
+jackass
+badass
+fatass
+=ass
+=asses
+=arse
+=damn
+=crap
+=piss
+pissed
+=prick
+douche
+bollock
+=bugger
+wanker
+=wank
+twat
+cunt
+=hell
+
+# --- sexual ---
+dickhead
+bigdick
+mydick
+=dick
+=dicks
+cockhead
+cocksuck
+bigcock
+=cock
+=cocks
+penis
+vagina
+pussy
+=puss
+boob
+=tits
+=titty
+=titties
+=cum
+cumshot
+jizz
+dildo
+orgasm
+=porn
+porno
+pornhub
+onlyfans
+=sex
+sexy
+=anal
+=anus
+blowjob
+handjob
+horny
+milf
+=nude
+nudes
+=naked
+=slut
+sluts
+whore
+=hoe
+=hoes
+=thot
+skank
+=rape
+=rapist
+pedo
+molest
+=balls
+=nuts
+=butt
+butthole
+=shag
+
+# --- slurs and hate ---
+nigger
+nigga
+=nig
+=coon
+faggot
+=fag
+=fags
+retard
+tranny
+=dyke
+=spic
+chink
+=gook
+kike
+wetback
+hitler
+=nazi
+nazis
+heilh
+=kkk
+whitepower
+
+# --- classic prank names ---
+deeznut
+ligma
+sugma
+sugondese
+bofa
+joemama
+yomama
+yourmom
+urmom
+bendover
+mikehunt
+mikeoxlong
+hughjas
+hughjass
+amandahug
+phukyu
+=poop
+poophead

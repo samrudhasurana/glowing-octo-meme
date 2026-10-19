@@ -14,7 +14,7 @@
         "img": "survivor_b.jpg"
       },
       "correct": "B",
-      "explanation": ""
+      "explanation": "$1,000,000 in 2000 × (332 ÷ 172) = $1,930,233 in 2026 dollars — less than the $2,000,000 prize in 2026. So the 2026 prize is worth MORE."
     },
     {
       "id": "jordans",
@@ -29,7 +29,7 @@
         "img": "jordans_b.jpg"
       },
       "correct": "B",
-      "explanation": "$56.95 in 1985 is $175.07 in 2026 dollars, versus $149.99 actually paid in 2026 — so the 2026 pair is cheaper."
+      "explanation": "$56.95 in 1985 × (332 ÷ 108) = $175.07 in 2026 dollars — more than the $149.99 paid in 2026. So the 2026 pair is cheaper."
     },
     {
       "id": "tv",
@@ -44,7 +44,7 @@
         "img": "tv_b.jpg"
       },
       "correct": "B",
-      "explanation": ""
+      "explanation": "$279.95 in 1953 × (332 ÷ 27) = $3,442.35 in 2026 dollars — far more than the $199.99 paid in 2026. So the 2026 TV is cheaper."
     },
     {
       "id": "house",
@@ -59,7 +59,7 @@
         "img": "house_b.jpg"
       },
       "correct": "A",
-      "explanation": ""
+      "explanation": "$43,500 in 1976 × (296 ÷ 57) = $225,895 in 2022 dollars — far less than the $911,963 paid in 2022. So the 1976 house is cheaper."
     },
     {
       "id": "bigmac",
@@ -74,7 +74,7 @@
         "img": "bigmac_b.jpg"
       },
       "correct": "A",
-      "explanation": "$0.49 in 1968 is $4.65 in 2026 dollars (0.49 × 332 ÷ 35), versus $6.72 actually paid in 2026 — so the 1968 Big Mac is cheaper."
+      "explanation": "$0.49 in 1968 × (332 ÷ 35) = $4.65 in 2026 dollars — less than the $6.72 paid in 2026. So the 1968 Big Mac is cheaper."
     },
     {
       "id": "ford",
@@ -89,7 +89,7 @@
         "img": "ford_b.jpg"
       },
       "correct": "B",
-      "explanation": ""
+      "explanation": "$850 in 1909 × (259 ÷ 9) = $24,461 in 2020 dollars — more than the $23,170 paid in 2020. So the 2020 Ford is cheaper."
     }
   ]
 }
