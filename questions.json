@@ -118,6 +118,22 @@
       },
       "correct": "B",
       "explanation": "$850 in 1909 × (259 ÷ 9) = $24,461 in 2020 dollars — more than the $23,170 paid in 2020. So the 2020 Ford is cheaper."
+    },
+    {
+      "id": "bonus",
+      "prompt": "⭐ BONUS (1000 points!): Which of these is Prof. Surana's favourite food?",
+      "seconds": 30,
+      "points": 1000,
+      "a": {
+        "text": "Samosas",
+        "img": "bonus_samosas.jpg"
+      },
+      "b": {
+        "text": "French fries",
+        "img": "bonus_fries.jpg"
+      },
+      "correct": "A",
+      "explanation": "Samosas, of course! Everyone who picked A gets the full 1000 bonus points, no matter how fast they answered."
     }
   ]
 }

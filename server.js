@@ -246,7 +246,10 @@ function answer(pid, choice) {
   const q = questions[qIndex];
   const limit = q.seconds * 1000;
   const elapsed = Math.min(Math.max(now - startedAt, 0), limit);
-  const points = choice === q.correct ? Math.round(1000 * (1 - 0.5 * elapsed / limit)) : 0;
+  // q.points = flat score for a correct answer (no speed bonus), e.g. the bonus question
+  const points = choice !== q.correct ? 0
+    : q.points ? q.points
+    : Math.round(1000 * (1 - 0.5 * elapsed / limit));
   answers.set(pid, { choice, points, at: now });
   p.score += points;
   p.lastPoints = points;
