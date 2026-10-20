@@ -30,6 +30,20 @@ screen and the startup log name the missing file.
 Each question's `explanation` in `questions.json` appears on the reveal/leaderboard slide.
 Each one shows the inflation calculation using the price and CPI on the cards.
 
+## Warm-up questions (word options)
+
+The first two questions are 30-second warm-ups. They have word options instead of price cards,
+and a picture appears on the reveal slide:
+
+```json
+{ "id": "stove", "prompt": "…", "seconds": 30,
+  "a": { "text": "🪵 Buy firewood" }, "b": { "text": "💸 Burn your cash" },
+  "correct": "B", "explanation": "…", "revealImg": "germany1923_reveal.jpg" }
+```
+
+`revealImg` can be added to any question. To swap a picture, upload a new file to `img/` with the
+same name (`zimbabwe_reveal.jpg`, `germany1923_reveal.jpg`).
+
 ## Blocked names
 
 `blocked-names.txt` lists names students can't use: swearing, sexual terms, slurs and classic

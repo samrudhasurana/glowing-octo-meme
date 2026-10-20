@@ -2,6 +2,34 @@
   "title": "Inflation: Then vs. Now",
   "questions": [
     {
+      "id": "trillion",
+      "prompt": "WARM-UP: What's the biggest \"dollar\" banknote a government has ever actually printed?",
+      "seconds": 30,
+      "a": {
+        "text": "$100,000 bill — USA, 1934"
+      },
+      "b": {
+        "text": "$100,000,000,000,000 bill — Zimbabwe, 2008"
+      },
+      "correct": "B",
+      "explanation": "Zimbabwe printed a 100 TRILLION dollar note. By November 2008, prices there were rising about 79.6 billion percent a month, doubling roughly every day. (The US $100,000 bill was real too, but it was only used to move money between Federal Reserve banks.)",
+      "revealImg": "zimbabwe_reveal.jpg"
+    },
+    {
+      "id": "stove",
+      "prompt": "WARM-UP: Germany, 1923. Prices double every few days. What's the cheapest way to heat your home?",
+      "seconds": 30,
+      "a": {
+        "text": "🪵 Buy firewood"
+      },
+      "b": {
+        "text": "💸 Burn your cash"
+      },
+      "correct": "B",
+      "explanation": "In Germany's hyperinflation, a bundle of marks was worth less than the firewood it could buy, so people fed banknotes straight into their stoves. At the peak in late 1923, prices doubled about every 3–4 days.",
+      "revealImg": "germany1923_reveal.jpg"
+    },
+    {
       "id": "survivor",
       "prompt": "SURVIVOR PRIZE MONEY: Adjusting for inflation, which is worth MORE?",
       "seconds": 60,
@@ -90,6 +118,22 @@
       },
       "correct": "B",
       "explanation": "$850 in 1909 × (259 ÷ 9) = $24,461 in 2020 dollars — more than the $23,170 paid in 2020. So the 2020 Ford is cheaper."
+    },
+    {
+      "id": "bonus",
+      "prompt": "⭐ BONUS (1000 points!): Which of these is Prof. Surana's favourite food?",
+      "seconds": 30,
+      "points": 1000,
+      "a": {
+        "text": "Samosas",
+        "img": "bonus_samosas.jpg"
+      },
+      "b": {
+        "text": "French fries",
+        "img": "bonus_fries.jpg"
+      },
+      "correct": "A",
+      "explanation": "Samosas, of course! Everyone who picked A gets the full 1000 bonus points, no matter how fast they answered."
     }
   ]
 }

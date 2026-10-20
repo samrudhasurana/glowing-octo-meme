@@ -99,13 +99,15 @@ function publicQuestion(i, withAnswer) {
     prompt: q.prompt,
     seconds: q.seconds,
     options: {
-      A: { year: q.a.year, img: imgUrl(q.a.img), file: q.a.img },
-      B: { year: q.b.year, img: imgUrl(q.b.img), file: q.b.img },
+      A: { year: q.a.year, text: q.a.text, img: imgUrl(q.a.img), file: q.a.img },
+      B: { year: q.b.year, text: q.b.text, img: imgUrl(q.b.img), file: q.b.img },
     },
   };
   if (withAnswer) {
     out.correct = q.correct;
     out.explanation = q.explanation || '';
+    // optional picture shown only on the reveal slide
+    if (q.revealImg) out.revealImg = imgUrl(q.revealImg);
   }
   return out;
 }
@@ -244,7 +246,10 @@ function answer(pid, choice) {
   const q = questions[qIndex];
   const limit = q.seconds * 1000;
   const elapsed = Math.min(Math.max(now - startedAt, 0), limit);
-  const points = choice === q.correct ? Math.round(1000 * (1 - 0.5 * elapsed / limit)) : 0;
+  // q.points = flat score for a correct answer (no speed bonus), e.g. the bonus question
+  const points = choice !== q.correct ? 0
+    : q.points ? q.points
+    : Math.round(1000 * (1 - 0.5 * elapsed / limit));
   answers.set(pid, { choice, points, at: now });
   p.score += points;
   p.lastPoints = points;
@@ -444,7 +449,9 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   const missing = [];
-  for (const q of questions) for (const o of [q.a, q.b]) if (!imgUrl(o.img)) missing.push(o.img);
+  for (const q of questions) {
+    for (const f of [q.a.img, q.b.img, q.revealImg]) if (f && !imgUrl(f)) missing.push(f);
+  }
   console.log(`\n${quiz.title} — ${questions.length} questions\n`);
   console.log('HOST (open this on the projector computer):');
   console.log(`  http://localhost:${PORT}/host?key=${HOST_KEY}`);
